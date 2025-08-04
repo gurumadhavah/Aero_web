@@ -11,7 +11,6 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog"
 import Image from "next/image";
-import { Button } from "@/components/ui/button";
 
 interface Project {
   title: string;
@@ -62,7 +61,7 @@ export default function ProjectsPage() {
   return (
     <div className="container py-12 px-4 md:px-6">
       <div className="space-y-4 text-center mb-12">
-        <h1 className="text-4xl font-bold font-headline tracking-tighter sm:text-5xl">Our Projects</h1>
+        <h1 className="text-4xl font-bold font-headline tracking-tighter sm:text-5xl text-primary">Our Projects</h1>
         <p className="max-w-[900px] mx-auto text-foreground/80 md:text-xl">
           A showcase of the innovative projects designed and built by SJECAero members.
         </p>
@@ -71,7 +70,7 @@ export default function ProjectsPage() {
         {projects.map((project, index) => (
           <Dialog key={index}>
             <DialogTrigger asChild>
-              <Card className="overflow-hidden cursor-pointer transform transition-all duration-300 hover:scale-105 hover:shadow-xl">
+              <Card className="bg-card border-primary/20 overflow-hidden cursor-pointer transform transition-all duration-300 hover:scale-105 hover:shadow-xl hover:border-primary">
                 <CardHeader className="p-0">
                   <Image
                     src={project.imageUrl}
@@ -89,7 +88,7 @@ export default function ProjectsPage() {
                 </CardContent>
               </Card>
             </DialogTrigger>
-            <DialogContent className="max-w-3xl">
+            <DialogContent className="max-w-3xl bg-card border-primary/20">
               <DialogHeader>
                  <Image
                     src={project.imageUrl}
@@ -99,7 +98,7 @@ export default function ProjectsPage() {
                     className="aspect-video object-cover rounded-md mb-4"
                     data-ai-hint={project.aiHint}
                   />
-                <DialogTitle className="text-3xl font-headline">{project.title}</DialogTitle>
+                <DialogTitle className="text-3xl font-headline text-primary">{project.title}</DialogTitle>
                 <DialogDescription as="div" className="text-base text-foreground/90">
                   <p className="mt-4">{project.fullDescription}</p>
                 </DialogDescription>
@@ -111,5 +110,3 @@ export default function ProjectsPage() {
     </div>
   );
 }
-
-    

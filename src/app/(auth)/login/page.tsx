@@ -47,9 +47,9 @@ export default function LoginPage() {
   }
 
   return (
-    <Card className="mx-auto max-w-sm w-full">
+    <Card className="mx-auto max-w-sm w-full bg-card border-primary/20">
       <CardHeader>
-        <CardTitle className="text-2xl font-headline">Member Login</CardTitle>
+        <CardTitle className="text-2xl font-headline text-primary">Member Login</CardTitle>
         <CardDescription>
           Enter your email below to login to your account
         </CardDescription>
@@ -83,7 +83,7 @@ export default function LoginPage() {
                 </FormItem>
               )}
             />
-            <Button type="submit" className="w-full mt-2">
+            <Button type="submit" className="w-full mt-2 bg-primary hover:bg-primary/90 text-primary-foreground">
               Login
             </Button>
           </form>

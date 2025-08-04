@@ -19,10 +19,10 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="en" className="dark" style={{colorScheme: "dark"}} suppressHydrationWarning>
       <body className={`${inter.variable} ${spaceGrotesk.variable} font-body antialiased`}>
         <Header />
-        <main>{children}</main>
+        <main className="min-h-[calc(100vh-14rem)]">{children}</main>
         <Footer />
         <Toaster />
       </body>

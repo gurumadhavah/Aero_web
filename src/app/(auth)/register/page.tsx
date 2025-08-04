@@ -49,9 +49,9 @@ export default function RegisterPage() {
   }
 
   return (
-    <Card className="mx-auto max-w-sm w-full">
+    <Card className="mx-auto max-w-sm w-full bg-card border-primary/20">
       <CardHeader>
-        <CardTitle className="text-2xl font-headline">Create an Account</CardTitle>
+        <CardTitle className="text-2xl font-headline text-primary">Create an Account</CardTitle>
         <CardDescription>
           Enter your information to create an account
         </CardDescription>
@@ -98,7 +98,7 @@ export default function RegisterPage() {
                 </FormItem>
               )}
             />
-            <Button type="submit" className="w-full mt-2 bg-accent hover:bg-accent/90">
+            <Button type="submit" className="w-full mt-2 bg-primary hover:bg-primary/90 text-primary-foreground">
               Create Account
             </Button>
           </form>

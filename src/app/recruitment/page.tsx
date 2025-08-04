@@ -55,6 +55,7 @@ export default function RecruitmentPage() {
     toast({
       title: "Application Submitted!",
       description: "Thank you for your interest. We will get back to you soon.",
+      variant: "default",
     });
     form.reset();
   }
@@ -65,9 +66,9 @@ export default function RecruitmentPage() {
   if (!isRecruitmentActive) {
     return (
       <div className="container py-12 px-4 md:px-6">
-        <Card className="mx-auto max-w-2xl">
+        <Card className="mx-auto max-w-2xl bg-card border-primary/20">
           <CardHeader className="text-center">
-            <CardTitle className="text-2xl font-headline">Recruitment Closed</CardTitle>
+            <CardTitle className="text-2xl font-headline text-primary">Recruitment Closed</CardTitle>
             <CardDescription>
               Our recruitment drive is currently closed. Please check back later or follow our social media for announcements.
             </CardDescription>
@@ -79,9 +80,9 @@ export default function RecruitmentPage() {
 
   return (
     <div className="container py-12 px-4 md:px-6">
-      <Card className="mx-auto max-w-2xl">
+      <Card className="mx-auto max-w-2xl bg-card border-primary/20">
         <CardHeader className="text-center">
-          <CardTitle className="text-3xl font-headline">Join SJECAero</CardTitle>
+          <CardTitle className="text-3xl font-headline text-primary">Join SJECAero</CardTitle>
           <CardDescription>
             Ready to build the future of flight? Fill out the form below to apply.
           </CardDescription>
@@ -156,7 +157,7 @@ export default function RecruitmentPage() {
                     </FormItem>
                   )}
                 />
-                 <Button type="submit" className="w-full mt-2" size="lg">
+                 <Button type="submit" className="w-full mt-2 bg-primary hover:bg-primary/90 text-primary-foreground" size="lg">
                     Submit Application
                 </Button>
             </form>

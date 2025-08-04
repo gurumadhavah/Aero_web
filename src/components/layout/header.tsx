@@ -16,7 +16,6 @@ const navItems = [
   { label: 'Events', href: '/events' },
   { label: 'Team', href: '/team' },
   { label: 'Gallery', href: '/gallery' },
-  { label: 'Contact', href: '/#contact' },
 ];
 
 export default function Header() {
@@ -27,7 +26,7 @@ export default function Header() {
     <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container flex h-16 items-center">
         <Link href="/" className="mr-6 flex items-center space-x-2">
-          <Image src="https://placehold.co/100x40.png" alt="SJECAero Logo" width={100} height={40} data-ai-hint="logo eagle" />
+          <Image src="https://placehold.co/120x40.png" alt="SJECAero Logo" width={120} height={40} data-ai-hint="logo eagle" />
         </Link>
         <nav className="hidden md:flex items-center space-x-6 text-sm font-medium">
           {navItems.map((item) => (
@@ -36,7 +35,7 @@ export default function Header() {
               href={item.href}
               className={cn(
                 'transition-colors hover:text-primary',
-                pathname === item.href ? 'text-primary' : 'text-foreground/60'
+                pathname === item.href ? 'text-primary' : 'text-foreground/80'
               )}
             >
               {item.label}
@@ -48,8 +47,8 @@ export default function Header() {
             <Button variant="ghost" asChild>
               <Link href="/login">Login</Link>
             </Button>
-            <Button asChild className="bg-accent hover:bg-accent/90 text-accent-foreground">
-              <Link href="/register">Register Now</Link>
+            <Button asChild className="bg-primary hover:bg-primary/90 text-primary-foreground">
+              <Link href="/recruitment">Join Us</Link>
             </Button>
           </nav>
           <Sheet open={isMobileMenuOpen} onOpenChange={setIsMobileMenuOpen}>
@@ -59,11 +58,11 @@ export default function Header() {
                 <span className="sr-only">Toggle Menu</span>
               </Button>
             </SheetTrigger>
-            <SheetContent side="left">
+            <SheetContent side="left" className="bg-background">
               <div className="flex flex-col h-full">
                 <div className="p-4 border-b">
                   <Link href="/" className="flex items-center space-x-2">
-                    <Image src="https://placehold.co/100x40.png" alt="SJECAero Logo" width={100} height={40} data-ai-hint="logo eagle" />
+                    <Image src="https://placehold.co/120x40.png" alt="SJECAero Logo" width={120} height={40} data-ai-hint="logo eagle" />
                   </Link>
                 </div>
                 <nav className="flex flex-col gap-4 p-4">
@@ -85,8 +84,8 @@ export default function Header() {
                     <Button variant="outline" asChild>
                         <Link href="/login" onClick={() => setIsMobileMenuOpen(false)}>Login</Link>
                     </Button>
-                    <Button asChild className="bg-accent hover:bg-accent/90 text-accent-foreground">
-                        <Link href="/register" onClick={() => setIsMobileMenuOpen(false)}>Register Now</Link>
+                    <Button asChild className="bg-primary hover:bg-primary/90 text-primary-foreground">
+                        <Link href="/recruitment" onClick={() => setIsMobileMenuOpen(false)}>Join Us</Link>
                     </Button>
                 </div>
               </div>
@@ -97,5 +96,3 @@ export default function Header() {
     </header>
   );
 }
-
-    

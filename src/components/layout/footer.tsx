@@ -4,67 +4,75 @@ import Link from 'next/link';
 
 export default function Footer() {
   return (
-    <footer className="w-full bg-primary/5 border-t border-border/40">
+    <footer id="contact-info" className="w-full bg-secondary/30 border-t border-border/40">
       <div className="container py-12 px-4 md:px-6">
-        <div className="grid gap-8 md:grid-cols-3">
-          <div className="flex flex-col gap-2">
+        <div className="grid gap-10 md:grid-cols-12">
+          <div className="md:col-span-4 flex flex-col gap-4">
             <Link href="/" className="flex items-center space-x-2">
-              <Image src="https://placehold.co/100x40.png" alt="SJECAero Logo" width={100} height={40} data-ai-hint="logo eagle" />
+              <Image src="https://placehold.co/120x40.png" alt="SJECAero Logo" width={120} height={40} data-ai-hint="logo eagle" />
             </Link>
-            <p className="text-sm text-foreground/80 max-w-xs">
+            <p className="text-sm text-foreground/70 max-w-xs">
               Designing, building, and flying the future of aerospace technology at SJEC.
             </p>
-          </div>
-          <div className="md:col-span-2 grid grid-cols-2 md:grid-cols-4 gap-8">
-            <div>
-              <h4 className="font-headline font-semibold mb-2">Navigation</h4>
-              <ul className="space-y-2 text-sm">
-                <li><Link href="/projects" className="text-foreground/80 hover:text-primary">Projects</Link></li>
-                <li><Link href="/team" className="text-foreground/80 hover:text-primary">Team</Link></li>
-                <li><Link href="/events" className="text-foreground/80 hover:text-primary">Events</Link></li>
-                <li><Link href="/gallery" className="text-foreground/80 hover:text-primary">Gallery</Link></li>
-              </ul>
-            </div>
-            <div>
-              <h4 className="font-headline font-semibold mb-2">Get Involved</h4>
-              <ul className="space-y-2 text-sm">
-                <li><Link href="/recruitment" className="text-foreground/80 hover:text-primary">Join Us</Link></li>
-                <li><Link href="/#contact" className="text-foreground/80 hover:text-primary">Contact</Link></li>
-                <li><Link href="/login" className="text-foreground/80 hover:text-primary">Member Login</Link></li>
-              </ul>
-            </div>
-            <div>
-              <h4 className="font-headline font-semibold mb-2">Contact</h4>
-               <ul className="space-y-2 text-sm">
-                <li>
-                    <Link href="mailto:sjec.aero@example.com" className="text-foreground/80 hover:text-primary flex items-center gap-2">
-                        <Mail className="h-4 w-4" />
-                        <span>Email</span>
-                    </Link>
-                </li>
-                <li>
-                    <Link href="https://maps.app.goo.gl/mdzLGFHTdY29koda6" target="_blank" rel="noopener noreferrer" className="text-foreground/80 hover:text-primary flex items-center gap-2">
-                        <MapPin className="h-4 w-4" />
-                        <span>Location</span>
-                    </Link>
-                </li>
-              </ul>
-            </div>
-            <div>
-              <h4 className="font-headline font-semibold mb-2">Connect</h4>
-              <div className="flex space-x-4 mt-2">
-                <Link href="https://www.linkedin.com/company/sjec-aero/posts/?feedView=all" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn"><Linkedin className="h-5 w-5 text-foreground/80 hover:text-primary" /></Link>
-                <Link href="#" aria-label="Instagram"><Instagram className="h-5 w-5 text-foreground/80 hover:text-primary" /></Link>
+             <div className="flex space-x-4 mt-2">
+                <Link href="https://www.linkedin.com/company/sjec-aero/posts/?feedView=all" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn" className="text-foreground/70 hover:text-primary transition-colors">
+                  <Linkedin className="h-6 w-6" />
+                </Link>
+                <Link href="#" aria-label="Instagram" className="text-foreground/70 hover:text-primary transition-colors">
+                    <Instagram className="h-6 w-6" />
+                </Link>
               </div>
+          </div>
+          <div className="md:col-span-8 grid grid-cols-2 md:grid-cols-3 gap-8">
+            <div>
+              <h4 className="font-headline font-semibold mb-3 text-primary">Navigation</h4>
+              <ul className="space-y-2 text-sm">
+                <li><Link href="/#about" className="text-foreground/70 hover:text-primary transition-colors">About Us</Link></li>
+                <li><Link href="/projects" className="text-foreground/70 hover:text-primary transition-colors">Projects</Link></li>
+                <li><Link href="/team" className="text-foreground/70 hover:text-primary transition-colors">Team</Link></li>
+                <li><Link href="/gallery" className="text-foreground/70 hover:text-primary transition-colors">Gallery</Link></li>
+              </ul>
+            </div>
+            <div>
+              <h4 className="font-headline font-semibold mb-3 text-primary">Get Involved</h4>
+              <ul className="space-y-2 text-sm">
+                <li><Link href="/recruitment" className="text-foreground/70 hover:text-primary transition-colors">Join Us</Link></li>
+                <li><Link href="/events" className="text-foreground/70 hover:text-primary transition-colors">Events</Link></li>
+                 <li><Link href="/achievements" className="text-foreground/70 hover:text-primary transition-colors">Achievements</Link></li>
+                <li><Link href="/login" className="text-foreground/70 hover:text-primary transition-colors">Member Login</Link></li>
+              </ul>
+            </div>
+            <div>
+              <h4 className="font-headline font-semibold mb-3 text-primary">Contact</h4>
+               <ul className="space-y-3 text-sm">
+                <li className="flex items-start gap-3">
+                    <Mail className="h-5 w-5 mt-0.5 text-primary" />
+                    <div>
+                        <span className="font-semibold">Email</span>
+                        <br/>
+                        <Link href="mailto:sjec.aero@example.com" className="text-foreground/70 hover:text-primary transition-colors">
+                            sjec.aero@example.com
+                        </Link>
+                    </div>
+                </li>
+                <li className="flex items-start gap-3">
+                    <MapPin className="h-5 w-5 mt-0.5 text-primary" />
+                    <div>
+                        <span className="font-semibold">Location</span>
+                        <br/>
+                        <Link href="https://maps.app.goo.gl/mdzLGFHTdY29koda6" target="_blank" rel="noopener noreferrer" className="text-foreground/70 hover:text-primary transition-colors">
+                            SJEC, Mangalore
+                        </Link>
+                    </div>
+                </li>
+              </ul>
             </div>
           </div>
         </div>
-        <div className="mt-8 pt-8 border-t border-border/40 text-center text-sm text-foreground/60">
+        <div className="mt-10 pt-8 border-t border-border/40 text-center text-sm text-foreground/60">
           <p>&copy; {new Date().getFullYear()} SJECAero - SJEC AERO Club. All Rights Reserved.</p>
         </div>
       </div>
     </footer>
   );
 }
-
-    
