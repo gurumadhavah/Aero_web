@@ -2,7 +2,8 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { Plane, Menu } from 'lucide-react';
+import Image from 'next/image';
+import { Menu } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { cn } from '@/lib/utils';
@@ -26,8 +27,7 @@ export default function Header() {
     <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container flex h-16 items-center">
         <Link href="/" className="mr-6 flex items-center space-x-2">
-          <Plane className="h-6 w-6 text-primary" />
-          <span className="font-bold font-headline text-lg">SJECAero</span>
+          <Image src="https://placehold.co/100x40.png" alt="SJECAero Logo" width={100} height={40} data-ai-hint="logo eagle" />
         </Link>
         <nav className="hidden md:flex items-center space-x-6 text-sm font-medium">
           {navItems.map((item) => (
@@ -63,8 +63,7 @@ export default function Header() {
               <div className="flex flex-col h-full">
                 <div className="p-4 border-b">
                   <Link href="/" className="flex items-center space-x-2">
-                    <Plane className="h-6 w-6 text-primary" />
-                    <span className="font-bold font-headline text-lg">SJECAero</span>
+                    <Image src="https://placehold.co/100x40.png" alt="SJECAero Logo" width={100} height={40} data-ai-hint="logo eagle" />
                   </Link>
                 </div>
                 <nav className="flex flex-col gap-4 p-4">
@@ -98,3 +97,5 @@ export default function Header() {
     </header>
   );
 }
+
+    

@@ -1,4 +1,5 @@
-import { Plane, Linkedin, Mail, MapPin, Instagram } from 'lucide-react';
+import Image from 'next/image';
+import { Linkedin, Mail, MapPin, Instagram } from 'lucide-react';
 import Link from 'next/link';
 
 export default function Footer() {
@@ -8,8 +9,7 @@ export default function Footer() {
         <div className="grid gap-8 md:grid-cols-3">
           <div className="flex flex-col gap-2">
             <Link href="/" className="flex items-center space-x-2">
-              <Plane className="h-6 w-6 text-primary" />
-              <span className="font-bold font-headline text-lg">SJECAero</span>
+              <Image src="https://placehold.co/100x40.png" alt="SJECAero Logo" width={100} height={40} data-ai-hint="logo eagle" />
             </Link>
             <p className="text-sm text-foreground/80 max-w-xs">
               Designing, building, and flying the future of aerospace technology at SJEC.
@@ -53,7 +53,7 @@ export default function Footer() {
             <div>
               <h4 className="font-headline font-semibold mb-2">Connect</h4>
               <div className="flex space-x-4 mt-2">
-                <Link href="#" aria-label="LinkedIn"><Linkedin className="h-5 w-5 text-foreground/80 hover:text-primary" /></Link>
+                <Link href="https://www.linkedin.com/company/sjec-aero/posts/?feedView=all" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn"><Linkedin className="h-5 w-5 text-foreground/80 hover:text-primary" /></Link>
                 <Link href="#" aria-label="Instagram"><Instagram className="h-5 w-5 text-foreground/80 hover:text-primary" /></Link>
               </div>
             </div>
@@ -66,3 +66,5 @@ export default function Footer() {
     </footer>
   );
 }
+
+    

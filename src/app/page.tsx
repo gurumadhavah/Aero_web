@@ -72,20 +72,20 @@ export default function Home() {
             <div className="space-y-2">
               <h2 className="text-3xl font-bold font-headline tracking-tighter sm:text-5xl">About SJECAero</h2>
               <p className="max-w-[900px] text-foreground/80 md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed">
-                SJECAero is more than just a club; it's a community of innovators, engineers, and aviation enthusiasts at SJEC dedicated to pushing the boundaries of aeronautics. We provide a platform for students to gain hands-on experience and turn theoretical knowledge into practical reality.
+                SJEC AERO is an aeromodelling club of St. Joseph Engineering College, established with an aim to create innovation in the field of aviation with regard to Unmanned Aerial Vehicles (RC planes and drones). The tagline of the club is &quot;The lower you fall, the higher you fly&quot;, which is an epitome of how the club has taken shape over time. SJEC AERO takes part in various Aeromodelling competitions across India. Apart from competitions, we conduct research in this field and develop products beneficial to the society. We also conduct workshops to those interested in aeromodelling.
               </p>
             </div>
           </div>
           <div className="mx-auto grid max-w-5xl items-start gap-8 sm:grid-cols-2 md:gap-12 lg:grid-cols-2 mt-12">
             <div className="grid gap-1 text-center p-6 rounded-lg bg-card shadow-md animate-fade-in-up" style={{ animationDelay: '0.2s' }}>
                 <Rocket className="h-12 w-12 mx-auto text-primary"/>
-                <h3 className="text-lg font-bold font-headline">Our Mission</h3>
-                <p className="text-sm text-foreground/80">To foster a culture of innovation and practical learning in aerospace engineering, empowering students to develop skills for the future.</p>
+                <h3 className="text-lg font-bold font-headline">Objective and Mission</h3>
+                <p className="text-sm text-foreground/80">To motivate and enhance the knowledge of students who are passionate towards aeronautical activities. Provide a hands-on working experience in RC Aircraft Design, Prototyping, and Manufacturing Processes.</p>
             </div>
             <div className="grid gap-1 text-center p-6 rounded-lg bg-card shadow-md animate-fade-in-up" style={{ animationDelay: '0.4s' }}>
                 <Target className="h-12 w-12 mx-auto text-primary"/>
                 <h3 className="text-lg font-bold font-headline">Our Vision</h3>
-                <p className="text-sm text-foreground/80">To be a leading collegiate club in aerospace technology, recognized for our groundbreaking projects and contribution to the field.</p>
+                <p className="text-sm text-foreground/80">To be one of the leading aeromodelling clubs in the nation.</p>
             </div>
           </div>
         </div>
@@ -155,7 +155,9 @@ export default function Home() {
             <Card className="flex flex-col items-center p-6 text-center shadow-md animate-fade-in-up" style={{ animationDelay: '0.6s' }}>
               <Linkedin className="h-10 w-10 text-primary mb-4"/>
               <h3 className="font-headline text-lg font-semibold">LinkedIn</h3>
-              <p className="text-muted-foreground">@sjec-aero-club</p>
+               <Link href="https://www.linkedin.com/company/sjec-aero/posts/?feedView=all" target="_blank" rel="noopener noreferrer" className="text-muted-foreground underline">
+                @sjec-aero-club
+              </Link>
             </Card>
           </div>
         </div>
@@ -163,3 +165,5 @@ export default function Home() {
     </div>
   );
 }
+
+    
