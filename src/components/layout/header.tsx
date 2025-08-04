@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState } from 'react';
@@ -16,6 +17,7 @@ const navItems = [
   { label: 'Events', href: '/events' },
   { label: 'Team', href: '/team' },
   { label: 'Gallery', href: '/gallery' },
+  { label: 'Contact', href: '/contact' },
 ];
 
 export default function Header() {
@@ -58,10 +60,10 @@ export default function Header() {
                 <span className="sr-only">Toggle Menu</span>
               </Button>
             </SheetTrigger>
-            <SheetContent side="left" className="bg-background">
+            <SheetContent side="left" className="bg-background p-0">
               <div className="flex flex-col h-full">
                 <div className="p-4 border-b">
-                  <Link href="/" className="flex items-center space-x-2">
+                  <Link href="/" onClick={() => setIsMobileMenuOpen(false)} className="flex items-center space-x-2">
                     <Image src="https://placehold.co/120x40.png" alt="SJECAero Logo" width={120} height={40} data-ai-hint="logo eagle" />
                   </Link>
                 </div>
