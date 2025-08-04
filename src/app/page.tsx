@@ -31,8 +31,8 @@ export default function Home() {
       <section className="w-full py-12 md:py-24 lg:py-32 xl:py-48 bg-gradient-to-br from-primary/10 to-background">
         <div className="container px-4 md:px-6">
           <div className="grid gap-6 lg:grid-cols-[1fr_500px] lg:gap-12 xl:grid-cols-[1fr_600px]">
-            <div className="flex flex-col justify-center space-y-4 animate-slide-in-left">
-              <div className="space-y-2">
+            <div className="flex flex-col justify-center space-y-4">
+              <div className="space-y-2 animate-fade-in-up" style={{ animationDelay: '0.2s' }}>
                 <h1 className="font-headline text-4xl font-bold tracking-tighter sm:text-5xl xl:text-6xl/none bg-clip-text text-transparent bg-gradient-to-r from-primary to-accent">
                   Welcome to SJECAero
                 </h1>
@@ -40,7 +40,7 @@ export default function Home() {
                   The official hub for the SJEC AERO Club. We design, build, and fly the future of aerospace technology.
                 </p>
               </div>
-              <div className="flex flex-col gap-2 min-[400px]:flex-row">
+              <div className="flex flex-col gap-2 min-[400px]:flex-row animate-fade-in-up" style={{ animationDelay: '0.4s' }}>
                 <Button asChild size="lg" className="bg-primary hover:bg-primary/90 text-primary-foreground">
                   <Link href="/projects">
                     Explore Projects
@@ -59,7 +59,8 @@ export default function Home() {
               height="400"
               alt="Hero RC Plane"
               data-ai-hint="rc plane"
-              className="mx-auto aspect-video overflow-hidden rounded-xl object-cover sm:w-full lg:order-last animate-slide-in-right"
+              className="mx-auto aspect-video overflow-hidden rounded-xl object-cover sm:w-full lg:order-last animate-fade-in-up"
+              style={{ animationDelay: '0.6s' }}
             />
           </div>
         </div>
@@ -67,7 +68,7 @@ export default function Home() {
 
       <section id="about" className="w-full py-12 md:py-24 lg:py-32">
         <div className="container px-4 md:px-6">
-          <div className="flex flex-col items-center justify-center space-y-4 text-center animate-fade-in">
+          <div className="flex flex-col items-center justify-center space-y-4 text-center animate-fade-in-up">
             <div className="space-y-2">
               <h2 className="text-3xl font-bold font-headline tracking-tighter sm:text-5xl">About SJECAero</h2>
               <p className="max-w-[900px] text-foreground/80 md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed">
@@ -76,12 +77,12 @@ export default function Home() {
             </div>
           </div>
           <div className="mx-auto grid max-w-5xl items-start gap-8 sm:grid-cols-2 md:gap-12 lg:grid-cols-2 mt-12">
-            <div className="grid gap-1 text-center p-6 rounded-lg bg-card shadow-md animate-fade-in" style={{ animationDelay: '200ms' }}>
+            <div className="grid gap-1 text-center p-6 rounded-lg bg-card shadow-md animate-fade-in-up" style={{ animationDelay: '0.2s' }}>
                 <Rocket className="h-12 w-12 mx-auto text-primary"/>
                 <h3 className="text-lg font-bold font-headline">Our Mission</h3>
                 <p className="text-sm text-foreground/80">To foster a culture of innovation and practical learning in aerospace engineering, empowering students to develop skills for the future.</p>
             </div>
-            <div className="grid gap-1 text-center p-6 rounded-lg bg-card shadow-md animate-fade-in" style={{ animationDelay: '400ms' }}>
+            <div className="grid gap-1 text-center p-6 rounded-lg bg-card shadow-md animate-fade-in-up" style={{ animationDelay: '0.4s' }}>
                 <Target className="h-12 w-12 mx-auto text-primary"/>
                 <h3 className="text-lg font-bold font-headline">Our Vision</h3>
                 <p className="text-sm text-foreground/80">To be a leading collegiate club in aerospace technology, recognized for our groundbreaking projects and contribution to the field.</p>
@@ -92,7 +93,7 @@ export default function Home() {
 
       <section id="featured" className="w-full py-12 md:py-24 lg:py-32 bg-primary/5">
         <div className="container px-4 md:px-6">
-          <div className="flex flex-col items-center justify-center space-y-4 text-center animate-fade-in">
+          <div className="flex flex-col items-center justify-center space-y-4 text-center animate-fade-in-up">
             <div className="space-y-2">
               <h2 className="text-3xl font-bold font-headline tracking-tighter sm:text-5xl">Featured Projects</h2>
               <p className="max-w-[900px] text-foreground/80 md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed">
@@ -102,7 +103,7 @@ export default function Home() {
           </div>
           <div className="mx-auto grid gap-8 sm:grid-cols-2 lg:grid-cols-3 mt-12">
             {featuredProjects.map((project, index) => (
-              <Card key={project.title} className="overflow-hidden transform transition-all duration-300 hover:scale-105 hover:shadow-xl animate-fade-in" style={{ animationDelay: `${index * 200}ms` }}>
+              <Card key={project.title} className="overflow-hidden transform transition-all duration-300 hover:scale-105 hover:shadow-xl animate-fade-in-up" style={{ animationDelay: `${(index + 1) * 0.2}s` }}>
                 <CardHeader className="p-0">
                   <Image
                     src={project.image}
@@ -130,7 +131,7 @@ export default function Home() {
 
       <section id="contact" className="w-full py-12 md:py-24 lg:py-32">
         <div className="container px-4 md:px-6">
-          <div className="flex flex-col items-center justify-center space-y-4 text-center animate-fade-in">
+          <div className="flex flex-col items-center justify-center space-y-4 text-center animate-fade-in-up">
             <div className="space-y-2">
               <h2 className="text-3xl font-bold font-headline tracking-tighter sm:text-5xl">Get In Touch</h2>
               <p className="max-w-[900px] text-foreground/80 md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed">
@@ -139,19 +140,19 @@ export default function Home() {
             </div>
           </div>
           <div className="mx-auto mt-12 grid grid-cols-1 md:grid-cols-3 gap-8">
-            <Card className="flex flex-col items-center p-6 text-center shadow-md animate-fade-in" style={{ animationDelay: '200ms' }}>
+            <Card className="flex flex-col items-center p-6 text-center shadow-md animate-fade-in-up" style={{ animationDelay: '0.2s' }}>
               <Mail className="h-10 w-10 text-primary mb-4"/>
               <h3 className="font-headline text-lg font-semibold">Email</h3>
               <p className="text-muted-foreground">sjec.aero@example.com</p>
             </Card>
-            <Card className="flex flex-col items-center p-6 text-center shadow-md animate-fade-in" style={{ animationDelay: '400ms' }}>
+            <Card className="flex flex-col items-center p-6 text-center shadow-md animate-fade-in-up" style={{ animationDelay: '0.4s' }}>
               <MapPin className="h-10 w-10 text-primary mb-4"/>
               <h3 className="font-headline text-lg font-semibold">Location</h3>
               <Link href="https://maps.app.goo.gl/mdzLGFHTdY29koda6" target="_blank" rel="noopener noreferrer" className="text-muted-foreground underline">
                 SJEC, Mangalore
               </Link>
             </Card>
-            <Card className="flex flex-col items-center p-6 text-center shadow-md animate-fade-in" style={{ animationDelay: '600ms' }}>
+            <Card className="flex flex-col items-center p-6 text-center shadow-md animate-fade-in-up" style={{ animationDelay: '0.6s' }}>
               <Linkedin className="h-10 w-10 text-primary mb-4"/>
               <h3 className="font-headline text-lg font-semibold">LinkedIn</h3>
               <p className="text-muted-foreground">@sjec-aero-club</p>
