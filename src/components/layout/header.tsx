@@ -27,7 +27,7 @@ export default function Header() {
       <div className="container flex h-16 items-center">
         <Link href="/" className="mr-6 flex items-center space-x-2">
           <Plane className="h-6 w-6 text-primary" />
-          <span className="font-bold font-headline text-lg">AeroSphere</span>
+          <span className="font-bold font-headline text-lg">SJECAero</span>
         </Link>
         <nav className="hidden md:flex items-center space-x-6 text-sm font-medium">
           {navItems.map((item) => (
@@ -64,7 +64,7 @@ export default function Header() {
                 <div className="p-4 border-b">
                   <Link href="/" className="flex items-center space-x-2">
                     <Plane className="h-6 w-6 text-primary" />
-                    <span className="font-bold font-headline text-lg">AeroSphere</span>
+                    <span className="font-bold font-headline text-lg">SJECAero</span>
                   </Link>
                 </div>
                 <nav className="flex flex-col gap-4 p-4">

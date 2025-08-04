@@ -6,7 +6,7 @@ export default function TeamPage() {
       <div className="space-y-4 text-center mb-12">
         <h1 className="text-4xl font-bold font-headline tracking-tighter sm:text-5xl">Meet the Team</h1>
         <p className="max-w-[900px] mx-auto text-foreground/80 md:text-xl">
-          The brilliant minds behind AeroSphere's success.
+          The brilliant minds behind SJECAero's success.
         </p>
       </div>
        <Card>

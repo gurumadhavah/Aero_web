@@ -1,4 +1,4 @@
-import { Plane, Linkedin, Mail, Phone } from 'lucide-react';
+import { Plane, Linkedin, Mail, MapPin, Instagram } from 'lucide-react';
 import Link from 'next/link';
 
 export default function Footer() {
@@ -9,7 +9,7 @@ export default function Footer() {
           <div className="flex flex-col gap-2">
             <Link href="/" className="flex items-center space-x-2">
               <Plane className="h-6 w-6 text-primary" />
-              <span className="font-bold font-headline text-lg">AeroSphere</span>
+              <span className="font-bold font-headline text-lg">SJECAero</span>
             </Link>
             <p className="text-sm text-foreground/80 max-w-xs">
               Designing, building, and flying the future of aerospace technology at SJEC.
@@ -34,17 +34,33 @@ export default function Footer() {
               </ul>
             </div>
             <div>
+              <h4 className="font-headline font-semibold mb-2">Contact</h4>
+               <ul className="space-y-2 text-sm">
+                <li>
+                    <Link href="mailto:sjec.aero@example.com" className="text-foreground/80 hover:text-primary flex items-center gap-2">
+                        <Mail className="h-4 w-4" />
+                        <span>Email</span>
+                    </Link>
+                </li>
+                <li>
+                    <Link href="https://maps.app.goo.gl/mdzLGFHTdY29koda6" target="_blank" rel="noopener noreferrer" className="text-foreground/80 hover:text-primary flex items-center gap-2">
+                        <MapPin className="h-4 w-4" />
+                        <span>Location</span>
+                    </Link>
+                </li>
+              </ul>
+            </div>
+            <div>
               <h4 className="font-headline font-semibold mb-2">Connect</h4>
               <div className="flex space-x-4 mt-2">
                 <Link href="#" aria-label="LinkedIn"><Linkedin className="h-5 w-5 text-foreground/80 hover:text-primary" /></Link>
-                <Link href="#" aria-label="Email"><Mail className="h-5 w-5 text-foreground/80 hover:text-primary" /></Link>
-                <Link href="#" aria-label="Phone"><Phone className="h-5 w-5 text-foreground/80 hover:text-primary" /></Link>
+                <Link href="#" aria-label="Instagram"><Instagram className="h-5 w-5 text-foreground/80 hover:text-primary" /></Link>
               </div>
             </div>
           </div>
         </div>
         <div className="mt-8 pt-8 border-t border-border/40 text-center text-sm text-foreground/60">
-          <p>&copy; {new Date().getFullYear()} AeroSphere - SJEC AERO Club. All Rights Reserved.</p>
+          <p>&copy; {new Date().getFullYear()} SJECAero - SJEC AERO Club. All Rights Reserved.</p>
         </div>
       </div>
     </footer>

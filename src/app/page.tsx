@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowRight, Linkedin, Mail, Phone, Rocket, Target, Users } from "lucide-react";
+import { ArrowRight, Instagram, Linkedin, Mail, MapPin, Rocket, Target, Users } from "lucide-react";
 
 export default function Home() {
   const featuredProjects = [
@@ -35,7 +35,7 @@ export default function Home() {
             <div className="flex flex-col justify-center space-y-4">
               <div className="space-y-2">
                 <h1 className="font-headline text-4xl font-bold tracking-tighter sm:text-5xl xl:text-6xl/none bg-clip-text text-transparent bg-gradient-to-r from-primary to-accent">
-                  Welcome to AeroSphere
+                  Welcome to SJECAero
                 </h1>
                 <p className="max-w-[600px] text-foreground/80 md:text-xl">
                   The official hub for the SJEC AERO Club. We design, build, and fly the future of aerospace technology.
@@ -70,9 +70,9 @@ export default function Home() {
         <div className="container px-4 md:px-6">
           <div className="flex flex-col items-center justify-center space-y-4 text-center">
             <div className="space-y-2">
-              <h2 className="text-3xl font-bold font-headline tracking-tighter sm:text-5xl">About AeroSphere</h2>
+              <h2 className="text-3xl font-bold font-headline tracking-tighter sm:text-5xl">About SJECAero</h2>
               <p className="max-w-[900px] text-foreground/80 md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed">
-                AeroSphere is more than just a club; it's a community of innovators, engineers, and aviation enthusiasts at SJEC dedicated to pushing the boundaries of aeronautics. We provide a platform for students to gain hands-on experience and turn theoretical knowledge into practical reality.
+                SJECAero is more than just a club; it's a community of innovators, engineers, and aviation enthusiasts at SJEC dedicated to pushing the boundaries of aeronautics. We provide a platform for students to gain hands-on experience and turn theoretical knowledge into practical reality.
               </p>
             </div>
           </div>
@@ -146,9 +146,11 @@ export default function Home() {
               <p className="text-muted-foreground">sjec.aero@example.com</p>
             </Card>
             <Card className="flex flex-col items-center p-6 text-center shadow-md">
-              <Phone className="h-10 w-10 text-primary mb-4"/>
-              <h3 className="font-headline text-lg font-semibold">Phone</h3>
-              <p className="text-muted-foreground">+1 (234) 567-890</p>
+              <MapPin className="h-10 w-10 text-primary mb-4"/>
+              <h3 className="font-headline text-lg font-semibold">Location</h3>
+              <Link href="https://maps.app.goo.gl/mdzLGFHTdY29koda6" target="_blank" rel="noopener noreferrer" className="text-muted-foreground underline">
+                SJEC, Mangalore
+              </Link>
             </Card>
             <Card className="flex flex-col items-center p-6 text-center shadow-md">
               <Linkedin className="h-10 w-10 text-primary mb-4"/>

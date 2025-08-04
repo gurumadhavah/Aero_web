@@ -9,7 +9,7 @@ const inter = Inter({ subsets: ['latin'], variable: '--font-inter' });
 const spaceGrotesk = Space_Grotesk({ subsets: ['latin'], variable: '--font-space-grotesk' });
 
 export const metadata: Metadata = {
-  title: 'AeroSphere - SJEC AERO Club',
+  title: 'SJECAero - SJEC AERO Club',
   description: 'The official website for the SJEC AERO Club. Explore our projects, achievements, and events.',
 };
 

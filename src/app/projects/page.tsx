@@ -6,7 +6,7 @@ export default function ProjectsPage() {
       <div className="space-y-4 text-center mb-12">
         <h1 className="text-4xl font-bold font-headline tracking-tighter sm:text-5xl">Our Projects</h1>
         <p className="max-w-[900px] mx-auto text-foreground/80 md:text-xl">
-          A showcase of the innovative projects designed and built by AeroSphere members.
+          A showcase of the innovative projects designed and built by SJECAero members.
         </p>
       </div>
        <Card>
