@@ -40,3 +40,20 @@
     @apply bg-background text-foreground;
   }
 }
+@layer utilities {
+  .spinner {
+    width: 120px;
+    height: 120px;
+    border: 8px solid hsl(var(--border)); /* The color of the track */
+    border-top-color: hsl(var(--primary)); /* The color of the spinning part */
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    position: absolute;
+  }
+
+  @keyframes spin {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+}

@@ -178,7 +178,7 @@ export default function Home() {
               </Link>
             </Button>
             <Button asChild size="lg" variant="outline" className="border-primary text-primary hover:bg-primary/10 hover:text-primary">
-              <Link href="/#contact-info">
+              <Link href="/contact">
                 Contact Us
               </Link>
             </Button>

@@ -1,9 +1,13 @@
+// src/app/(auth)/login/page.tsx
 "use client"
 
 import Link from "next/link"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import * as z from "zod"
+import { auth } from "@/lib/firebase"; // Import auth
+import { signInWithEmailAndPassword } from "firebase/auth";
+import { useRouter } from "next/navigation";
 
 import { Button } from "@/components/ui/button"
 import {
@@ -23,9 +27,12 @@ import {
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
 
+// 👇 UPDATE THIS SCHEMA 👇
 const formSchema = z.object({
   email: z.string().email({
     message: "Please enter a valid email address.",
+  }).refine(email => email.endsWith("@sjec.ac.in") || email.endsWith("@gmail.com"), {
+    message: "Email must be a valid @sjec.ac.in or @gmail.com address.",
   }),
   password: z.string().min(1, {
     message: "Password is required.",
@@ -33,6 +40,7 @@ const formSchema = z.object({
 })
 
 export default function LoginPage() {
+  const router = useRouter();
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -41,9 +49,16 @@ export default function LoginPage() {
     },
   })
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
-    // TODO: Implement Firebase login
-    console.log(values)
+  async function onSubmit(values: z.infer<typeof formSchema>) {
+    try {
+      await signInWithEmailAndPassword(auth, values.email, values.password);
+      router.push("/dashboard");
+    } catch (error) {
+      console.error("Error signing in:", error);
+      // You can add a toast notification here for login errors
+      const errorMessage = (error instanceof Error) ? error.message : "An unknown error occurred.";
+      alert(`Login failed. ${errorMessage}`);
+    }
   }
 
   return (

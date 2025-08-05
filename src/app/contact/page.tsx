@@ -1,4 +1,4 @@
-
+// src/app/contact/page.tsx
 "use client";
 
 import { useForm } from "react-hook-form";
@@ -6,7 +6,8 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { Mail, MapPin, Linkedin, Instagram, Send, User, MessageSquare, Type } from "lucide-react";
 import Link from "next/link";
-
+import { db } from "@/lib/firebase";
+import { collection, addDoc } from "firebase/firestore";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -24,14 +25,18 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 
+// 👇 UPDATE THIS SCHEMA 👇
 const formSchema = z.object({
   fullName: z.string().min(1, { message: "Full name is required." }),
   email: z.string().email({
     message: "Please enter a valid email address.",
+  }).refine(email => email.endsWith("@sjec.ac.in") || email.endsWith("@gmail.com"), {
+    message: "Email must be a valid @sjec.ac.in or @gmail.com address.",
   }),
   subject: z.string().min(1, { message: "Subject is required." }),
   message: z.string().min(10, { message: "Message must be at least 10 characters." }),
 });
+
 
 export default function ContactPage() {
   const { toast } = useToast();
@@ -45,17 +50,19 @@ export default function ContactPage() {
     },
   });
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
-    // TODO: Implement submission logic (e.g., send an email or save to a database)
-    console.log(values);
-    toast({
-      title: "Message Sent!",
-      description: "Thank you for reaching out. We will get back to you shortly.",
-      variant: "default",
-    });
-    form.reset();
-  }
-
+ async function onSubmit(values: z.infer<typeof formSchema>) {
+    try {
+        await addDoc(collection(db, "contacts"), values);
+        toast({
+          title: "Message Sent!",
+          description: "Thank you for reaching out. We will get back to you shortly.",
+          variant: "default",
+        });
+        form.reset();
+    } catch (error) {
+        console.error("Error adding document: ", error);
+    }
+}
   return (
     <div className="container py-12 px-4 md:px-6 animate-fade-in-up">
        <div className="space-y-4 text-center mb-12">
@@ -78,8 +85,8 @@ export default function ContactPage() {
                     <div>
                         <h3 className="font-semibold text-lg">Email</h3>
                         <p className="text-foreground/80">General Inquiries</p>
-                        <Link href="mailto:sjec.aero@example.com" className="text-primary hover:underline break-all">
-                            sjec.aero@example.com
+                        <Link href="mailto:team.aero@sjec.ac.in" className="text-primary hover:underline break-all">
+                            team.aero@sjec.ac.in
                         </Link>
                     </div>
                 </div>
@@ -106,7 +113,7 @@ export default function ContactPage() {
                             <Link href="https://www.linkedin.com/company/sjec-aero/posts/?feedView=all" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn" className="text-primary hover:text-primary/80 transition-colors">
                             <Linkedin className="h-7 w-7" />
                             </Link>
-                            <Link href="#" aria-label="Instagram" className="text-primary hover:text-primary/80 transition-colors">
+                            <Link href="https://www.instagram.com/sjec_aero/" target="_blank" aria-label="Instagram" className="text-primary hover:text-primary/80 transition-colors">
                                 <Instagram className="h-7 w-7" />
                             </Link>
                         </div>

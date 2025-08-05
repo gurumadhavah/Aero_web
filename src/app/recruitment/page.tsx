@@ -1,9 +1,13 @@
+// src/app/recruitment/page.tsx
 "use client";
 
+import * as React from "react";
 import Link from "next/link";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
+import { db } from "@/lib/firebase"; 
+import { collection, addDoc, getDocs, query, where } from "firebase/firestore"; 
 
 import { Button } from "@/components/ui/button";
 import {
@@ -26,10 +30,13 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 
+// 👇 UPDATE THIS SCHEMA 👇
 const formSchema = z.object({
   fullName: z.string().min(1, { message: "Full name is required." }),
   email: z.string().email({
     message: "Please enter a valid email address.",
+  }).refine(email => email.endsWith("@sjec.ac.in") || email.endsWith("@gmail.com"), {
+    message: "Email must be a valid @sjec.ac.in or @gmail.com address.",
   }),
   yearOfStudy: z.string().min(1, { message: "Year of study is required." }),
   branch: z.string().min(1, { message: "Branch is required." }),
@@ -49,19 +56,35 @@ export default function RecruitmentPage() {
     },
   });
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
-    // TODO: Implement Firebase submission logic
-    console.log(values);
-    toast({
-      title: "Application Submitted!",
-      description: "Thank you for your interest. We will get back to you soon.",
-      variant: "default",
-    });
-    form.reset();
+  async function onSubmit(values: z.infer<typeof formSchema>) {
+    try {
+        await addDoc(collection(db, "recruitment"), values);
+        toast({
+          title: "Application Submitted!",
+          description: "Thank you for your interest. We will get back to you soon.",
+          variant: "default",
+        });
+        form.reset();
+    } catch (error) {
+        console.error("Error adding document: ", error);
+    }
   }
 
-  // TODO: This should be controlled by the Captain from the dashboard
-  const isRecruitmentActive = true;
+  const [isRecruitmentActive, setIsRecruitmentActive] = React.useState(true);
+
+  React.useEffect(() => {
+      const fetchRecruitmentStatus = async () => {
+          const settingsCollection = collection(db, "settings");
+          const q = query(settingsCollection, where("name", "==", "recruitment"));
+          const querySnapshot = await getDocs(q);
+          if (!querySnapshot.empty) {
+              const settingsDoc = querySnapshot.docs[0].data();
+              setIsRecruitmentActive(settingsDoc.active);
+          }
+      };
+      fetchRecruitmentStatus();
+  }, []);
+
 
   if (!isRecruitmentActive) {
     return (
@@ -137,7 +160,7 @@ export default function RecruitmentPage() {
                     <FormItem>
                       <FormLabel>Branch</FormLabel>
                       <FormControl>
-                        <Input placeholder="e.g., Aeronautical Engineering" {...field} />
+                        <Input placeholder="e.g., Computer Science And Engineering" {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>

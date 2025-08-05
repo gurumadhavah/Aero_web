@@ -1,3 +1,4 @@
+// src/components/layout/footer.tsx
 import Image from 'next/image';
 import { Linkedin, Mail, MapPin, Instagram } from 'lucide-react';
 import Link from 'next/link';
@@ -9,7 +10,7 @@ export default function Footer() {
         <div className="grid gap-10 md:grid-cols-12">
           <div className="md:col-span-4 flex flex-col gap-4">
             <Link href="/" className="flex items-center space-x-2">
-              <Image src="https://placehold.co/120x40.png" alt="SJECAero Logo" width={120} height={40} data-ai-hint="logo eagle" />
+              <Image src="/images/logo.png" alt="SJECAero Logo" width={120} height={40} />
             </Link>
             <p className="text-sm text-foreground/70 max-w-xs">
               Designing, building, and flying the future of aerospace technology at SJEC.
@@ -18,7 +19,7 @@ export default function Footer() {
                 <Link href="https://www.linkedin.com/company/sjec-aero/posts/?feedView=all" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn" className="text-foreground/70 hover:text-primary transition-colors">
                   <Linkedin className="h-6 w-6" />
                 </Link>
-                <Link href="#" aria-label="Instagram" className="text-foreground/70 hover:text-primary transition-colors">
+                <Link href="https://www.instagram.com/sjec_aero/" target='_blank' aria-label="Instagram" className="text-foreground/70 hover:text-primary transition-colors">
                     <Instagram className="h-6 w-6" />
                 </Link>
               </div>
@@ -50,8 +51,8 @@ export default function Footer() {
                     <div>
                         <span className="font-semibold">Email</span>
                         <br/>
-                        <Link href="mailto:sjec.aero@example.com" className="text-foreground/70 hover:text-primary transition-colors">
-                            sjec.aero@example.com
+                        <Link href="mailto:team.aero@sjec.ac.in" className="text-foreground/70 hover:text-primary transition-colors">
+                            team.aero@sjec.ac.in
                         </Link>
                     </div>
                 </li>
@@ -70,7 +71,7 @@ export default function Footer() {
           </div>
         </div>
         <div className="mt-10 pt-8 border-t border-border/40 text-center text-sm text-foreground/60">
-          <p>&copy; {new Date().getFullYear()} SJECAero - SJEC AERO Club. All Rights Reserved.</p>
+          <p>© {new Date().getFullYear()} SJECAero - SJEC AERO Club. All Rights Reserved.</p>
         </div>
       </div>
     </footer>
