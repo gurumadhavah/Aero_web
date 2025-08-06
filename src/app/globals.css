@@ -57,3 +57,58 @@
     }
   }
 }
+
+@layer components {
+  /* --- START: Replace your old timeline styles with these --- */
+  .timeline-container::before {
+    content: '';
+    position: absolute;
+    left: 50%;
+    top: 0;
+    bottom: 0;
+    width: 4px;
+    background-color: hsl(var(--border));
+    transform: translateX(-50%);
+  }
+
+  .timeline-item {
+    position: relative;
+    width: 50%;
+  }
+
+  /* Position items on the right side */
+  .timeline-item:nth-child(odd) {
+    align-self: flex-end;
+    padding-left: 2rem; /* Space from the center line */
+  }
+
+  /* Position items on the left side */
+  .timeline-item:nth-child(even) {
+    align-self: flex-start;
+    padding-right: 2rem; /* Space from the center line */
+  }
+
+  .timeline-dot {
+    position: absolute;
+    top: 0.25rem;
+    height: 1.25rem;
+    width: 1.25rem;
+    border-radius: 9999px;
+    border: 3px solid hsl(var(--primary));
+    background-color: hsl(var(--background));
+    z-index: 10;
+  }
+  
+  /* Dot for right-side items */
+  .timeline-item:nth-child(odd) .timeline-dot {
+    left: 0;
+    transform: translateX(-50%);
+  }
+
+  /* Dot for left-side items */
+  .timeline-item:nth-child(even) .timeline-dot {
+    right: 0;
+    transform: translateX(50%);
+  }
+  /* --- END: New timeline styles --- */
+}

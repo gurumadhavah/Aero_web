@@ -48,11 +48,11 @@ export default function Home() {
     <div className="flex flex-col min-h-[100dvh] overflow-x-hidden">
       <section className="relative w-full h-[80vh] min-h-[600px] flex items-center justify-center text-center">
         <Image
-          src="https://placehold.co/1920x1080.png"
+          src="/images/back2.png"
           alt="Hero background"
           layout="fill"
           objectFit="cover"
-          className="absolute inset-0 z-0 opacity-20"
+          className="absolute inset-0 z-0 opacity-35"
           data-ai-hint="dark dramatic airplane"
         />
         <div className="relative z-10 container px-4 md:px-6 animate-fade-in-up">
@@ -91,7 +91,7 @@ export default function Home() {
             </div>
             <div className="animate-fade-in-up" style={{ animationDelay: '0.4s' }}>
               <Image
-                src="https://placehold.co/600x400.png"
+                src="/images/reallogo.JPG"
                 width="600"
                 height="400"
                 alt="About Us Image"

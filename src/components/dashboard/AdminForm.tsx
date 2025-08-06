@@ -17,14 +17,17 @@ import { cn } from "@/lib/utils";
 import { format } from "date-fns";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
+// 👇 UPDATE THIS INTERFACE 👇
 interface AdminFormProps {
   collectionName: string;
   formSchema: any;
   fields: any[];
   formTitle: string;
+  onSubmitted: () => void; // Add this prop
 }
 
-export function AdminForm({ collectionName, formSchema, fields, formTitle }: AdminFormProps) {
+// 👇 UPDATE THE FUNCTION SIGNATURE 👇
+export function AdminForm({ collectionName, formSchema, fields, formTitle, onSubmitted }: AdminFormProps) {
   const { toast } = useToast();
   const form = useForm({
     resolver: zodResolver(formSchema),
@@ -35,10 +38,11 @@ export function AdminForm({ collectionName, formSchema, fields, formTitle }: Adm
     try {
       await addDoc(collection(db, collectionName), {
         ...values,
-        createdAt: serverTimestamp(), // Add a timestamp for sorting
+        createdAt: serverTimestamp(),
       });
       toast({ title: "Success!", description: `${formTitle} has been added.` });
       form.reset();
+      onSubmitted(); // 👈 Call the function here to refresh the list
     } catch (error) {
       console.error("Error adding document: ", error);
       toast({ title: "Error", description: "Could not add the document.", variant: "destructive" });

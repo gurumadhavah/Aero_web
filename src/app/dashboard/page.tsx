@@ -11,51 +11,73 @@ import { ViewSubmissions } from '@/components/dashboard/ViewSubmissions';
 import { AdminPanel } from '@/components/dashboard/AdminPanel';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ExportButton } from '@/components/dashboard/ExportButton';
-import { DocumentUploadForm } from '@/components/dashboard/DocumentUploadForm'; // 👈 Import
-import { ViewDocuments } from '@/components/dashboard/ViewDocuments'; // 👈 Import
+import { DocumentUploadForm } from '@/components/dashboard/DocumentUploadForm';
+import { ViewDocuments } from '@/components/dashboard/ViewDocuments';
+import { ManageMembers } from '@/components/dashboard/ManageMembers';
 
 // --- Dashboard Components for Different Roles ---
 
 const CaptainDashboard = ({ userProfile }: any) => (
   <div className="space-y-8">
     <h2 className="text-2xl font-semibold">Welcome, Captain {userProfile.fullName}!</h2>
-    <AdminPanel />
-    <Tabs defaultValue="recruitment">
-      <TabsList className="grid w-full grid-cols-5">
-        <TabsTrigger value="recruitment">Recruitment</TabsTrigger>
-        <TabsTrigger value="contacts">Contacts</TabsTrigger>
-        <TabsTrigger value="materials">Material Logs</TabsTrigger>
-        <TabsTrigger value="documents">Documents</TabsTrigger> {/* New Tab */}
-        <TabsTrigger value="logUsage">Log Your Usage</TabsTrigger>
-      </TabsList>
-      {/* ... other TabsContent ... */}
-      <TabsContent value="recruitment">
-        <div className="my-4"><ExportButton collectionName="recruitment" fileName="recruitment_responses" /></div>
-        <ViewSubmissions collectionName="recruitment" title="Recruitment Applications" description="Review and manage new member applications." headers={['fullName', 'email', 'yearOfStudy', 'branch', 'reason']} />
-      </TabsContent>
-       <TabsContent value="contacts">
-        <div className="my-4"><ExportButton collectionName="contacts" fileName="contact_messages" /></div>
-        <ViewSubmissions collectionName="contacts" title="Contact Form Submissions" description="Messages sent through the contact page." headers={['fullName', 'email', 'subject', 'message']} />
-      </TabsContent>
-       <TabsContent value="materials">
-        <div className="my-4"><ExportButton collectionName="materialLogs" fileName="material_usage_logs" /></div>
-        <ViewSubmissions collectionName="materialLogs" title="Material Usage Logs" description="Recent material usage logs submitted by members." headers={['memberName', 'itemName', 'quantity', 'condition', 'notes']} />
-      </TabsContent>
-      <TabsContent value="documents">
-        <div className="grid gap-8">
+    
+    <Tabs defaultValue="manageMembers" className="w-full">
+        <TabsList className="grid w-full grid-cols-2">
+            <TabsTrigger value="manageMembers">Member Administration</TabsTrigger>
+            <TabsTrigger value="content">Content & Submissions</TabsTrigger>
+        </TabsList>
+        <TabsContent value="manageMembers">
             <Card>
-                <CardHeader><CardTitle>Upload Document</CardTitle></CardHeader>
-                <CardContent><DocumentUploadForm /></CardContent>
+                <CardHeader>
+                    <CardTitle>Member Administration</CardTitle>
+                    <CardDescription>Add, remove, and edit roles for all club members.</CardDescription>
+                </CardHeader>
+                <CardContent>
+                    <ManageMembers />
+                </CardContent>
             </Card>
-            <ViewDocuments />
-        </div>
-      </TabsContent>
-      <TabsContent value="logUsage">
-        <Card>
-            <CardHeader><CardTitle>Log Your Material Usage</CardTitle><CardDescription>Log any materials or components you have used.</CardDescription></CardHeader>
-            <CardContent><MaterialLogForm /></CardContent>
-        </Card>
-      </TabsContent>
+        </TabsContent>
+        <TabsContent value="content">
+            <div className="space-y-6">
+                <AdminPanel />
+                <Tabs defaultValue="recruitment" className="w-full">
+                    <TabsList className="grid w-full grid-cols-5">
+                        <TabsTrigger value="recruitment">Recruitment</TabsTrigger>
+                        <TabsTrigger value="contacts">Contacts</TabsTrigger>
+                        <TabsTrigger value="materials">Material Logs</TabsTrigger>
+                        <TabsTrigger value="documents">Documents</TabsTrigger>
+                        <TabsTrigger value="logUsage">Log Your Usage</TabsTrigger>
+                    </TabsList>
+                    <TabsContent value="recruitment">
+                        <div className="my-4"><ExportButton collectionName="recruitment" fileName="recruitment_responses" /></div>
+                        <ViewSubmissions collectionName="recruitment" title="Recruitment Applications" description="Review new member applications." headers={['fullName', 'email', 'yearOfStudy', 'branch', 'reason']} />
+                    </TabsContent>
+                    <TabsContent value="contacts">
+                        <div className="my-4"><ExportButton collectionName="contacts" fileName="contact_messages" /></div>
+                        <ViewSubmissions collectionName="contacts" title="Contact Form Submissions" description="Messages from the contact page." headers={['fullName', 'email', 'subject', 'message']} />
+                    </TabsContent>
+                    <TabsContent value="materials">
+                        <div className="my-4"><ExportButton collectionName="materialLogs" fileName="material_usage_logs" /></div>
+                        <ViewSubmissions collectionName="materialLogs" title="Material Usage Logs" description="Logs submitted by members." headers={['memberName', 'itemName', 'quantity', 'condition', 'notes']} />
+                    </TabsContent>
+                    <TabsContent value="documents">
+                        <div className="grid gap-8 pt-4">
+                            <Card>
+                                <CardHeader><CardTitle>Upload Document</CardTitle></CardHeader>
+                                <CardContent><DocumentUploadForm /></CardContent>
+                            </Card>
+                            <ViewDocuments />
+                        </div>
+                    </TabsContent>
+                    <TabsContent value="logUsage">
+                        <Card className="mt-4">
+                            <CardHeader><CardTitle>Log Your Material Usage</CardTitle><CardDescription>Log any materials or components you have used.</CardDescription></CardHeader>
+                            <CardContent><MaterialLogForm /></CardContent>
+                        </Card>
+                    </TabsContent>
+                </Tabs>
+            </div>
+        </TabsContent>
     </Tabs>
   </div>
 );
@@ -63,37 +85,55 @@ const CaptainDashboard = ({ userProfile }: any) => (
 const CoreMemberDashboard = ({ userProfile }: any) => (
   <div className="space-y-8">
     <h2 className="text-2xl font-semibold">Welcome, {userProfile.fullName}!</h2>
-    <AdminPanel />
-    <Tabs defaultValue="documents">
-      <TabsList className="grid w-full grid-cols-3">
-        <TabsTrigger value="documents">Documents</TabsTrigger>
-        <TabsTrigger value="viewLogs">Material Logs</TabsTrigger>
-        <TabsTrigger value="logUsage">Log Your Usage</TabsTrigger>
-      </TabsList>
-      <TabsContent value="documents">
-        <div className="grid gap-8">
-            <Card>
-                <CardHeader><CardTitle>Upload Document</CardTitle></CardHeader>
-                <CardContent><DocumentUploadForm /></CardContent>
+    
+    <Tabs defaultValue="manageMembers" className="w-full">
+        <TabsList className="grid w-full grid-cols-2">
+            <TabsTrigger value="manageMembers">Manage Members</TabsTrigger>
+            <TabsTrigger value="content">Content Management</TabsTrigger>
+        </TabsList>
+        <TabsContent value="manageMembers">
+           <Card>
+                <CardHeader>
+                    <CardTitle>Member Administration</CardTitle>
+                    <CardDescription>Add new members to the team roster and pre-approve them for registration.</CardDescription>
+                </CardHeader>
+                <CardContent>
+                    <ManageMembers />
+                </CardContent>
             </Card>
-            <ViewDocuments />
-        </div>
-      </TabsContent>
-       <TabsContent value="viewLogs">
-         <div className="my-4"><ExportButton collectionName="materialLogs" fileName="material_usage_logs" /></div>
-         <ViewSubmissions collectionName="materialLogs" title="Material Usage Logs" description="Recent material usage logs submitted by members." headers={['memberName', 'itemName', 'quantity', 'condition', 'notes']} />
-       </TabsContent>
-       <TabsContent value="logUsage">
-          <Card>
-            <CardHeader><CardTitle>Log Your Material Usage</CardTitle><CardDescription>Log any materials or components you have used.</CardDescription></CardHeader>
-            <CardContent><MaterialLogForm /></CardContent>
-        </Card>
-       </TabsContent>
+        </TabsContent>
+        <TabsContent value="content">
+            <AdminPanel />
+            <Tabs defaultValue="documents" className="mt-6">
+              <TabsList className="grid w-full grid-cols-3">
+                <TabsTrigger value="documents">Documents</TabsTrigger>
+                <TabsTrigger value="viewLogs">Material Logs</TabsTrigger>
+                <TabsTrigger value="logUsage">Log Your Usage</TabsTrigger>
+              </TabsList>
+              <TabsContent value="documents">
+                <div className="grid gap-8 pt-4">
+                    <Card>
+                        <CardHeader><CardTitle>Upload Document</CardTitle></CardHeader>
+                        <CardContent><DocumentUploadForm /></CardContent>
+                    </Card>
+                    <ViewDocuments />
+                </div>
+              </TabsContent>
+              <TabsContent value="viewLogs">
+                <div className="my-4"><ExportButton collectionName="materialLogs" fileName="material_usage_logs" /></div>
+                <ViewSubmissions collectionName="materialLogs" title="Material Usage Logs" description="Recent material usage logs from members." headers={['memberName', 'itemName', 'quantity', 'condition', 'notes']} />
+              </TabsContent>
+              <TabsContent value="logUsage">
+                <Card className="mt-4">
+                  <CardHeader><CardTitle>Log Your Material Usage</CardTitle><CardDescription>Log any materials you have used.</CardDescription></CardHeader>
+                  <CardContent><MaterialLogForm /></CardContent>
+                </Card>
+              </TabsContent>
+            </Tabs>
+        </TabsContent>
     </Tabs>
   </div>
 );
-
-// ... NormalMemberDashboard remains the same ...
 
 const NormalMemberDashboard = ({ userProfile }: any) => (
   <div className="grid md:grid-cols-2 gap-8">
@@ -117,8 +157,8 @@ const NormalMemberDashboard = ({ userProfile }: any) => (
     </Card>
   </div>
 );
+// --- End of Dashboard Components ---
 
-// ... The rest of the DashboardPage component ...
 export default function DashboardPage() {
   const { user, userProfile, loading } = useAuth();
   const router = useRouter();
