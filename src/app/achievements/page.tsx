@@ -35,7 +35,7 @@ export default function AchievementsPage() {
   React.useEffect(() => {
     const fetchAchievements = async () => {
       try {
-        const q = query(collection(db, "achievements"), orderBy("sortId", "desc"));
+        const q = query(collection(db, "achievements"), orderBy("sortId", "asc"));
         const querySnapshot = await getDocs(q);
         const achievementsData = querySnapshot.docs.map(doc => ({
           id: doc.id,
@@ -117,8 +117,6 @@ export default function AchievementsPage() {
                 />
                 <DialogHeader className="p-6 text-left">
                   <DialogTitle className="text-3xl font-headline text-primary">{achievement.title}</DialogTitle>
-                  
-                  {/* 👇 THIS IS THE CORRECTED BLOCK 👇 */}
                   <DialogDescription asChild>
                     <div className="text-base text-foreground/90 space-y-4 pt-4">
                        <p>{achievement.description}</p>

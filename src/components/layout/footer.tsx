@@ -11,6 +11,9 @@ export default function Footer() {
           <div className="md:col-span-4 flex flex-col gap-4">
             <Link href="/" className="flex items-center space-x-2">
               <Image src="/images/logo.png" alt="SJECAero Logo" width={120} height={40} />
+              <p className="text-sm text-foreground/70">St. Joseph Engineering College 
+              Vamanjoor
+              Mangaluru - 575028</p>
             </Link>
             <p className="text-sm text-foreground/70 max-w-xs">
               Designing, building, and flying the future of aerospace technology at SJEC.

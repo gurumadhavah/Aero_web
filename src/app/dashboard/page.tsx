@@ -86,22 +86,10 @@ const CoreMemberDashboard = ({ userProfile }: any) => (
   <div className="space-y-8">
     <h2 className="text-2xl font-semibold">Welcome, {userProfile.fullName}!</h2>
     
-    <Tabs defaultValue="manageMembers" className="w-full">
-        <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="manageMembers">Manage Members</TabsTrigger>
+    <Tabs defaultValue="content" className="w-full">
+        <TabsList className="grid w-full grid-cols-1">
             <TabsTrigger value="content">Content Management</TabsTrigger>
         </TabsList>
-        <TabsContent value="manageMembers">
-           <Card>
-                <CardHeader>
-                    <CardTitle>Member Administration</CardTitle>
-                    <CardDescription>Add new members to the team roster and pre-approve them for registration.</CardDescription>
-                </CardHeader>
-                <CardContent>
-                    <ManageMembers />
-                </CardContent>
-            </Card>
-        </TabsContent>
         <TabsContent value="content">
             <AdminPanel />
             <Tabs defaultValue="documents" className="mt-6">

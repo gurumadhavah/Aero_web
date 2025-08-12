@@ -2,27 +2,28 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowRight, BrainCircuit, Hammer, Award, Users } from "lucide-react";
+import { ArrowRight, BrainCircuit, Hammer, Award } from "lucide-react";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 export default function Home() {
-  const featuredProjects = [
+  const testimonials = [
     {
-      title: "Autonomous Surveillance Drone",
-      description: "A cutting-edge drone with AI-powered object detection and tracking for aerial surveillance.",
-      image: "https://placehold.co/600x400.png",
-      aiHint: "surveillance drone"
+      name: "Founder Name 1",
+      role: "Co-Founder & Former Captain",
+      quote: "Starting SJECAero was about creating a space for passionate students to turn theory into reality. Seeing how the club has grown and the incredible projects it now undertakes is immensely proud.",
+      avatarUrl: "/images/team/founder1.png",
     },
     {
-      title: "VTOL RC Plane",
-      description: "A hybrid aircraft combining the flight characteristics of a plane with vertical takeoff and landing.",
-      image: "https://placehold.co/600x400.png",
-      aiHint: "VTOL plane"
+      name: "Founder Name 2",
+      role: "Co-Founder & Former Technical Head",
+      quote: "We dreamed of a club that would push the boundaries of aeromodelling at SJEC. The dedication and innovation I see in the members today have surpassed all our initial expectations.",
+      avatarUrl: "/images/team/founder2.png",
     },
     {
-      title: "Aerodynamics Simulation Suite",
-      description: "Development of a software suite for simulating and analyzing aerodynamic forces on custom aircraft designs.",
-      image: "https://placehold.co/600x400.png",
-      aiHint: "aerodynamics simulation"
+      name: "Faculty Coordinator Name",
+      role: "Founding Faculty Coordinator",
+      quote: "SJECAero provides an invaluable platform for practical learning and teamwork. It has consistently been a hub of creativity and technical excellence within the college.",
+      avatarUrl: "/images/team/faculty.png",
     },
   ];
 
@@ -52,12 +53,12 @@ export default function Home() {
           alt="Hero background"
           layout="fill"
           objectFit="cover"
-          className="absolute inset-0 z-0 opacity-35"
+          className="absolute inset-0 z-0 opacity-80"
           data-ai-hint="dark dramatic airplane"
         />
         <div className="relative z-10 container px-4 md:px-6 animate-fade-in-up">
           <h1 className="font-headline text-5xl font-bold tracking-tighter sm:text-6xl xl:text-7xl/none text-primary">
-            SJECAero
+            SJEC Aero
           </h1>
           <p className="max-w-[700px] mx-auto text-foreground/80 md:text-xl my-6">
             Designing, building, and flying the future of aerospace technology.
@@ -77,11 +78,12 @@ export default function Home() {
         </div>
       </section>
 
-      <section id="about" className="w-full py-12 md:py-24 lg:py-32 bg-background">
+      {/* 👇 PADDING REDUCED ON THIS SECTION 👇 */}
+      <section id="about" className="w-full py-12 md:py-20 bg-background">
         <div className="container px-4 md:px-6">
           <div className="grid md:grid-cols-2 gap-12 items-center">
             <div className="animate-fade-in-up" style={{ animationDelay: '0.2s' }}>
-              <h2 className="text-3xl font-bold font-headline tracking-tighter sm:text-4xl text-primary">About SJECAero</h2>
+              <h2 className="text-3xl font-bold font-headline tracking-tighter sm:text-4xl text-primary">About SJEC Aero</h2>
               <p className="mt-4 text-foreground/80 text-lg">
                 SJEC AERO is an aeromodelling club of St. Joseph Engineering College, established with an aim to create innovation in the field of aviation with regard to Unmanned Aerial Vehicles (RC planes and drones). The tagline of the club is &quot;The lower you fall, the higher you fly&quot;, which is an epitome of how the club has taken shape over time.
               </p>
@@ -103,7 +105,8 @@ export default function Home() {
         </div>
       </section>
 
-       <section id="why-join" className="w-full py-12 md:py-24 lg:py-32 bg-secondary/50">
+       {/* 👇 PADDING REDUCED ON THIS SECTION 👇 */}
+       <section id="why-join" className="w-full py-12 md:py-20 bg-secondary/50">
         <div className="container px-4 md:px-6">
           <div className="flex flex-col items-center justify-center space-y-4 text-center animate-fade-in-up">
             <div className="space-y-2">
@@ -125,45 +128,39 @@ export default function Home() {
         </div>
       </section>
 
-      <section id="featured" className="w-full py-12 md:py-24 lg:py-32">
+      {/* 👇 PADDING REDUCED ON THIS SECTION 👇 */}
+      <section id="testimonials" className="w-full py-12 md:py-20">
         <div className="container px-4 md:px-6">
           <div className="flex flex-col items-center justify-center space-y-4 text-center animate-fade-in-up">
             <div className="space-y-2">
-              <h2 className="text-3xl font-bold font-headline tracking-tighter sm:text-4xl text-primary">Featured Projects</h2>
+              <h2 className="text-3xl font-bold font-headline tracking-tighter sm:text-4xl text-primary">Words from Our Founders</h2>
               <p className="max-w-[900px] text-foreground/80 md:text-xl/relaxed">
-                Check out some of our latest and most exciting work.
+                Hear from the people who started it all.
               </p>
             </div>
           </div>
-          <div className="mx-auto grid gap-8 sm:grid-cols-2 lg:grid-cols-3 mt-12">
-            {featuredProjects.map((project, index) => (
-              <Card key={project.title} className="bg-card border-primary/20 overflow-hidden transform transition-all duration-300 hover:scale-105 hover:shadow-xl hover:border-primary animate-fade-in-up" style={{ animationDelay: `${(index + 1) * 0.2}s` }}>
-                <CardHeader className="p-0">
-                  <Image
-                    src={project.image}
-                    width="600"
-                    height="400"
-                    alt={project.title}
-                    data-ai-hint={project.aiHint}
-                    className="aspect-video object-cover"
-                  />
-                </CardHeader>
-                <CardContent className="p-6">
-                  <h3 className="text-lg font-bold font-headline">{project.title}</h3>
-                  <p className="text-sm text-foreground/80 mt-2 h-10">{project.description}</p>
-                  <Button variant="link" asChild className="p-0 h-auto mt-4 text-primary font-bold">
-                    <Link href="/projects">
-                      Learn More <ArrowRight className="ml-2 h-4 w-4" />
-                    </Link>
-                  </Button>
+          <div className="mx-auto grid gap-8 sm:grid-cols-1 lg:grid-cols-3 mt-12">
+            {testimonials.map((testimonial, index) => (
+              <Card key={testimonial.name} className="bg-card border-primary/20 transform transition-all duration-300 hover:scale-105 hover:shadow-xl hover:border-primary animate-fade-in-up" style={{ animationDelay: `${(index + 1) * 0.2}s` }}>
+                <CardContent className="p-6 text-center">
+                    <p className="text-foreground/80 italic">&quot;{testimonial.quote}&quot;</p>
                 </CardContent>
+                <CardHeader className="pt-0 flex flex-col items-center">
+                  <Avatar className="w-16 h-16 mb-4 border-2 border-primary/50">
+                    <AvatarImage src={testimonial.avatarUrl} alt={testimonial.name} className="object-cover" />
+                    <AvatarFallback>{testimonial.name.charAt(0)}</AvatarFallback>
+                  </Avatar>
+                  <CardTitle className="text-lg font-headline">{testimonial.name}</CardTitle>
+                  <p className="text-sm text-primary">{testimonial.role}</p>
+                </CardHeader>
               </Card>
             ))}
           </div>
         </div>
       </section>
 
-      <section id="contact" className="w-full py-12 md:py-24 lg:py-32 bg-secondary/50">
+      {/* 👇 PADDING REDUCED ON THIS SECTION 👇 */}
+      <section id="contact" className="w-full py-12 md:py-20 bg-secondary/50">
         <div className="container grid items-center justify-center gap-4 px-4 text-center md:px-6 animate-fade-in-up">
           <div className="space-y-3">
             <h2 className="text-3xl font-bold font-headline tracking-tighter md:text-4xl text-primary">Ready to Take Flight?</h2>
