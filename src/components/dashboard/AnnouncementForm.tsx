@@ -8,19 +8,17 @@ import { db } from "@/lib/firebase";
 import { collection, addDoc, serverTimestamp } from "firebase/firestore";
 import { getFunctions, httpsCallable } from "firebase/functions";
 import { Button } from "@/components/ui/button";
-import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
-import { Switch } from "@/components/ui/switch";
 import { useState } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../ui/card";
 
+// Schema is simplified, removing the boolean switches
 const formSchema = z.object({
   title: z.string().min(5, { message: "Title must be at least 5 characters." }),
   content: z.string().min(10, { message: "Content must be at least 10 characters." }),
-  isGlobal: z.boolean().default(false),
-  sendEmail: z.boolean().default(false),
 });
 
 export function AnnouncementForm() {
@@ -28,30 +26,26 @@ export function AnnouncementForm() {
   const [loading, setLoading] = useState(false);
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
-    defaultValues: { title: "", content: "", isGlobal: false, sendEmail: false },
+    defaultValues: { title: "", content: "" },
   });
-
-  const isClubOnly = !form.watch("isGlobal");
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setLoading(true);
     try {
-      // 1. Add announcement to Firestore
+      // 1. Add announcement to Firestore, type is always 'club-only'
       await addDoc(collection(db, "announcements"), {
         title: values.title,
         content: values.content,
-        type: values.isGlobal ? "global" : "club-only",
+        type: "club-only",
         createdAt: serverTimestamp(),
       });
 
-      // 2. If it's a club announcement and email is requested, call the Cloud Function
-      if (!values.isGlobal && values.sendEmail) {
-        const functions = getFunctions();
-        const sendAnnouncementEmail = httpsCallable(functions, 'sendAnnouncementEmail');
-        await sendAnnouncementEmail({ title: values.title, content: values.content });
-      }
+      // 2. Always call the Cloud Function to send the email
+      const functions = getFunctions();
+      const sendAnnouncementEmail = httpsCallable(functions, 'sendAnnouncementEmail');
+      await sendAnnouncementEmail({ title: values.title, content: values.content });
 
-      toast({ title: "Success!", description: "Your announcement has been posted." });
+      toast({ title: "Success!", description: "Your announcement has been posted and sent to all members." });
       form.reset();
     } catch (error: any) {
       console.error("Error posting announcement:", error);
@@ -64,7 +58,10 @@ export function AnnouncementForm() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Create Announcement</CardTitle>
+        <CardTitle>Create Club Announcement</CardTitle>
+        <CardDescription>
+          This will be posted in the members' portal and an email will be sent to all registered club members.
+        </CardDescription>
       </CardHeader>
       <CardContent>
         <Form {...form}>
@@ -75,26 +72,9 @@ export function AnnouncementForm() {
             <FormField control={form.control} name="content" render={({ field }) => (
               <FormItem><FormLabel>Content</FormLabel><FormControl><Textarea {...field} rows={5} /></FormControl><FormMessage /></FormItem>
             )} />
-            <FormField control={form.control} name="isGlobal" render={({ field }) => (
-              <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
-                <div className="space-y-0.5">
-                  <FormLabel>Global Announcement</FormLabel>
-                  <FormDescription>If checked, this will be visible to the public on the homepage.</FormDescription>
-                </div>
-                <FormControl><Switch checked={field.value} onCheckedChange={field.onChange} /></FormControl>
-              </FormItem>
-            )} />
-            {isClubOnly && (
-              <FormField control={form.control} name="sendEmail" render={({ field }) => (
-                <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
-                  <div className="space-y-0.5">
-                    <FormLabel>Send Email Notification</FormLabel>
-                    <FormDescription>Notify all registered club members via email.</FormDescription>
-                  </div>
-                  <FormControl><Switch checked={field.value} onCheckedChange={field.onChange} /></FormControl>
-                </FormItem>
-              )} />
-            )}
+            
+            {/* The Switch components for 'Global' and 'Send Email' have been removed */}
+            
             <Button type="submit" disabled={loading}>{loading ? "Posting..." : "Post Announcement"}</Button>
           </form>
         </Form>

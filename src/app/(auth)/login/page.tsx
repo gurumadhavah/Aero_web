@@ -26,6 +26,7 @@ import {
   FormMessage,
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
+import { toast } from "@/hooks/use-toast"
 
 // 👇 UPDATE THIS SCHEMA 👇
 const formSchema = z.object({
@@ -55,9 +56,7 @@ export default function LoginPage() {
       router.push("/dashboard");
     } catch (error) {
       console.error("Error signing in:", error);
-      // You can add a toast notification here for login errors
-      const errorMessage = (error instanceof Error) ? error.message : "An unknown error occurred.";
-      alert(`Login failed. ${errorMessage}`);
+      toast({ title: "Error", description: "An unknown error occurred.", variant: "destructive" });
     }
   }
 
