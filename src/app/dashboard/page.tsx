@@ -1,4 +1,3 @@
-// src/app/dashboard/page.tsx
 "use client";
 
 import * as React from 'react';
@@ -6,14 +5,25 @@ import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Skeleton } from '@/components/ui/skeleton';
-import { MaterialLogForm } from '@/components/dashboard/MaterialLogForm';
-import { ViewSubmissions } from '@/components/dashboard/ViewSubmissions';
-import { AdminPanel } from '@/components/dashboard/AdminPanel';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ExportButton } from '@/components/dashboard/ExportButton';
+
+// Form and View Components
+import { AnnouncementForm } from '@/components/dashboard/AnnouncementForm';
+import { ViewAnnouncements } from '@/components/dashboard/ViewAnnouncements';
+import { ManageMembers } from '@/components/dashboard/ManageMembers';
 import { DocumentUploadForm } from '@/components/dashboard/DocumentUploadForm';
 import { ViewDocuments } from '@/components/dashboard/ViewDocuments';
-import { ManageMembers } from '@/components/dashboard/ManageMembers';
+import { AddAchievementForm } from '@/components/dashboard/AddAchievementForm';
+import { ViewAchievements } from '@/components/dashboard/ViewAchievements';
+import { AddEventForm } from '@/components/dashboard/AddEventForm';
+import { ViewEvents } from '@/components/dashboard/ViewEvents';
+import { AddGalleryItemForm } from '@/components/dashboard/AddGalleryItemForm';
+import { ViewGallery } from '@/components/dashboard/ViewGallery';
+import { RecruitmentToggle } from '@/components/dashboard/RecruitmentToggle';
+import { ViewSubmissions } from '@/components/dashboard/ViewSubmissions';
+import { ExportButton } from '@/components/dashboard/ExportButton';
+import { MaterialLogForm } from '@/components/dashboard/MaterialLogForm';
+import { RecentActivityFeed } from '@/components/dashboard/RecentActivityFeed';
 
 // --- Dashboard Components for Different Roles ---
 
@@ -21,61 +31,120 @@ const CaptainDashboard = ({ userProfile }: any) => (
   <div className="space-y-8">
     <h2 className="text-2xl font-semibold">Welcome, Captain {userProfile.fullName}!</h2>
     
+    <div className="grid gap-8">
+      <AnnouncementForm />
+      <ViewAnnouncements />
+    </div>
+    
     <Tabs defaultValue="manageMembers" className="w-full">
-        <TabsList className="grid w-full grid-cols-2">
+        <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="manageMembers">Member Administration</TabsTrigger>
-            <TabsTrigger value="content">Content & Submissions</TabsTrigger>
+            <TabsTrigger value="content">Content Management</TabsTrigger>
+            <TabsTrigger value="materials">Materials</TabsTrigger>
         </TabsList>
         <TabsContent value="manageMembers">
             <Card>
-                <CardHeader>
-                    <CardTitle>Member Administration</CardTitle>
-                    <CardDescription>Add, remove, and edit roles for all club members.</CardDescription>
-                </CardHeader>
-                <CardContent>
-                    <ManageMembers />
-                </CardContent>
+                <CardHeader><CardTitle>Member Administration</CardTitle><CardDescription>Add, remove, and manage club members.</CardDescription></CardHeader>
+                <CardContent><ManageMembers /></CardContent>
             </Card>
         </TabsContent>
         <TabsContent value="content">
             <div className="space-y-6">
-                <AdminPanel />
-                <Tabs defaultValue="recruitment" className="w-full">
-                    <TabsList className="grid w-full grid-cols-5">
-                        <TabsTrigger value="recruitment">Recruitment</TabsTrigger>
-                        <TabsTrigger value="contacts">Contacts</TabsTrigger>
-                        <TabsTrigger value="materials">Material Logs</TabsTrigger>
+                <Tabs defaultValue="achievements" className="w-full">
+                    <TabsList className="grid w-full grid-cols-6">
+                        <TabsTrigger value="achievements">Achievements</TabsTrigger>
+                        <TabsTrigger value="events">Events</TabsTrigger>
+                        <TabsTrigger value="gallery">Gallery</TabsTrigger>
                         <TabsTrigger value="documents">Documents</TabsTrigger>
-                        <TabsTrigger value="logUsage">Log Your Usage</TabsTrigger>
+                        <TabsTrigger value="recruitment">Recruitment</TabsTrigger>
+                        <TabsTrigger value="contact">Contact</TabsTrigger>
                     </TabsList>
-                    <TabsContent value="recruitment">
-                        <div className="my-4"><ExportButton collectionName="recruitment" fileName="recruitment_responses" /></div>
-                        <ViewSubmissions collectionName="recruitment" title="Recruitment Applications" description="Review new member applications." headers={['fullName', 'email', 'yearOfStudy', 'branch', 'reason']} />
+                    <TabsContent value="achievements">
+                        <div className="grid gap-8 pt-4">
+                           <Card><CardHeader><CardTitle>Add New Achievement</CardTitle></CardHeader><CardContent className="pt-6"><AddAchievementForm /></CardContent></Card>
+                           <ViewAchievements />
+                        </div>
                     </TabsContent>
-                    <TabsContent value="contacts">
-                        <div className="my-4"><ExportButton collectionName="contacts" fileName="contact_messages" /></div>
-                        <ViewSubmissions collectionName="contacts" title="Contact Form Submissions" description="Messages from the contact page." headers={['fullName', 'email', 'subject', 'message']} />
+                    <TabsContent value="events">
+                       <div className="grid gap-8 pt-4">
+                           <Card><CardHeader><CardTitle>Add New Event</CardTitle></CardHeader><CardContent className="pt-6"><AddEventForm /></CardContent></Card>
+                           <ViewEvents />
+                        </div>
                     </TabsContent>
-                    <TabsContent value="materials">
-                        <div className="my-4"><ExportButton collectionName="materialLogs" fileName="material_usage_logs" /></div>
-                        <ViewSubmissions collectionName="materialLogs" title="Material Usage Logs" description="Logs submitted by members." headers={['memberName', 'itemName', 'quantity', 'condition', 'notes']} />
+                    <TabsContent value="gallery">
+                        <div className="grid gap-8 pt-4">
+                           <Card><CardHeader><CardTitle>Add to Gallery</CardTitle></CardHeader><CardContent className="pt-6"><AddGalleryItemForm /></CardContent></Card>
+                           <ViewGallery />
+                        </div>
                     </TabsContent>
                     <TabsContent value="documents">
                         <div className="grid gap-8 pt-4">
-                            <Card>
-                                <CardHeader><CardTitle>Upload Document</CardTitle></CardHeader>
-                                <CardContent><DocumentUploadForm /></CardContent>
-                            </Card>
+                            <Card><CardHeader><CardTitle>Upload Document</CardTitle></CardHeader><CardContent className="pt-6"><DocumentUploadForm /></CardContent></Card>
                             <ViewDocuments />
                         </div>
                     </TabsContent>
-                    <TabsContent value="logUsage">
-                        <Card className="mt-4">
-                            <CardHeader><CardTitle>Log Your Material Usage</CardTitle><CardDescription>Log any materials or components you have used.</CardDescription></CardHeader>
-                            <CardContent><MaterialLogForm /></CardContent>
-                        </Card>
+                     <TabsContent value="recruitment">
+                        <div className="grid gap-8 pt-4">
+                            <RecruitmentToggle />
+                            <div>
+                                <div className="my-4"><ExportButton collectionName="recruitment" fileName="recruitment_responses" orderByField="submittedAt" /></div>
+                                <ViewSubmissions 
+                                    collectionName="recruitment" 
+                                    title="Recruitment Applications" 
+                                    description="Review new member applications." 
+                                    headers={['fullName', 'email', 'yearOfStudy', 'branch', 'reason']} 
+                                    showActions={true} 
+                                    showDeleteAction={true}
+                                    orderByField="submittedAt"
+                                    itemLimit={20}
+                                />
+                            </div>
+                        </div>
+                    </TabsContent>
+                    <TabsContent value="contact">
+                        <div className="grid gap-8 pt-4">
+                            <div className="my-4">
+                                <ExportButton 
+                                    collectionName="contacts" 
+                                    fileName="contact_submissions" 
+                                    orderByField="submittedAt" 
+                                />
+                            </div>
+                            <ViewSubmissions 
+                                collectionName="contacts" 
+                                title="Contact Form Submissions" 
+                                description="Inquiries sent via the website's contact form." 
+                                headers={['fullName', 'email', 'subject', 'message', 'submittedAt']} 
+                                orderByField="submittedAt"
+                                showActions={false}
+                                showDeleteAction={true}
+                                itemLimit={20}
+                            />
+                        </div>
                     </TabsContent>
                 </Tabs>
+            </div>
+        </TabsContent>
+        <TabsContent value="materials">
+            <div className="grid gap-8 pt-4">
+                <Card>
+                    <CardHeader>
+                        <CardTitle>Log Material Usage</CardTitle>
+                        <CardDescription>Record items taken from or returned to the club inventory.</CardDescription>
+                    </CardHeader>
+                    <CardContent className="pt-6">
+                        <MaterialLogForm />
+                    </CardContent>
+                </Card>
+                <ViewSubmissions 
+                    collectionName="materialLogs"
+                    title="Material Usage Logs"
+                    description="A record of all materials used by club members."
+                    headers={['memberName', 'itemName', 'quantity', 'condition', 'notes', 'timestamp']}
+                    orderByField="timestamp"
+                    showDeleteAction={true}
+                    itemLimit={50}
+                />
             </div>
         </TabsContent>
     </Tabs>
@@ -83,41 +152,76 @@ const CaptainDashboard = ({ userProfile }: any) => (
 );
 
 const CoreMemberDashboard = ({ userProfile }: any) => (
-  <div className="space-y-8">
+    <div className="space-y-8">
     <h2 className="text-2xl font-semibold">Welcome, {userProfile.fullName}!</h2>
     
+    <div className="grid gap-8">
+      <AnnouncementForm />
+      <ViewAnnouncements />
+    </div>
+    
     <Tabs defaultValue="content" className="w-full">
-        <TabsList className="grid w-full grid-cols-1">
+        <TabsList className="grid w-full grid-cols-2">
             <TabsTrigger value="content">Content Management</TabsTrigger>
+            <TabsTrigger value="materials">Materials</TabsTrigger>
         </TabsList>
         <TabsContent value="content">
-            <AdminPanel />
-            <Tabs defaultValue="documents" className="mt-6">
-              <TabsList className="grid w-full grid-cols-3">
-                <TabsTrigger value="documents">Documents</TabsTrigger>
-                <TabsTrigger value="viewLogs">Material Logs</TabsTrigger>
-                <TabsTrigger value="logUsage">Log Your Usage</TabsTrigger>
-              </TabsList>
-              <TabsContent value="documents">
-                <div className="grid gap-8 pt-4">
-                    <Card>
-                        <CardHeader><CardTitle>Upload Document</CardTitle></CardHeader>
-                        <CardContent><DocumentUploadForm /></CardContent>
-                    </Card>
-                    <ViewDocuments />
-                </div>
-              </TabsContent>
-              <TabsContent value="viewLogs">
-                <div className="my-4"><ExportButton collectionName="materialLogs" fileName="material_usage_logs" /></div>
-                <ViewSubmissions collectionName="materialLogs" title="Material Usage Logs" description="Recent material usage logs from members." headers={['memberName', 'itemName', 'quantity', 'condition', 'notes']} />
-              </TabsContent>
-              <TabsContent value="logUsage">
-                <Card className="mt-4">
-                  <CardHeader><CardTitle>Log Your Material Usage</CardTitle><CardDescription>Log any materials you have used.</CardDescription></CardHeader>
-                  <CardContent><MaterialLogForm /></CardContent>
+            <div className="space-y-6">
+                <Tabs defaultValue="achievements" className="w-full">
+                    <TabsList className="grid w-full grid-cols-4">
+                        <TabsTrigger value="achievements">Achievements</TabsTrigger>
+                        <TabsTrigger value="events">Events</TabsTrigger>
+                        <TabsTrigger value="gallery">Gallery</TabsTrigger>
+                        <TabsTrigger value="documents">Documents</TabsTrigger>
+                    </TabsList>
+                    <TabsContent value="achievements">
+                        <div className="grid gap-8 pt-4">
+                           <Card><CardHeader><CardTitle>Add New Achievement</CardTitle></CardHeader><CardContent className="pt-6"><AddAchievementForm /></CardContent></Card>
+                           <ViewAchievements />
+                        </div>
+                    </TabsContent>
+                    <TabsContent value="events">
+                       <div className="grid gap-8 pt-4">
+                           <Card><CardHeader><CardTitle>Add New Event</CardTitle></CardHeader><CardContent className="pt-6"><AddEventForm /></CardContent></Card>
+                           <ViewEvents />
+                        </div>
+                    </TabsContent>
+                    <TabsContent value="gallery">
+                        <div className="grid gap-8 pt-4">
+                           <Card><CardHeader><CardTitle>Add to Gallery</CardTitle></CardHeader><CardContent className="pt-6"><AddGalleryItemForm /></CardContent></Card>
+                           <ViewGallery />
+                        </div>
+                    </TabsContent>
+                    <TabsContent value="documents">
+                        <div className="grid gap-8 pt-4">
+                            <Card><CardHeader><CardTitle>Upload Document</CardTitle></CardHeader><CardContent className="pt-6"><DocumentUploadForm /></CardContent></Card>
+                            <ViewDocuments />
+                        </div>
+                    </TabsContent>
+                </Tabs>
+            </div>
+        </TabsContent>
+        <TabsContent value="materials">
+            <div className="grid gap-8 pt-4">
+                <Card>
+                    <CardHeader>
+                        <CardTitle>Log Material Usage</CardTitle>
+                        <CardDescription>Record items taken from or returned to the club inventory.</CardDescription>
+                    </CardHeader>
+                    <CardContent className="pt-6">
+                        <MaterialLogForm />
+                    </CardContent>
                 </Card>
-              </TabsContent>
-            </Tabs>
+                <ViewSubmissions 
+                    collectionName="materialLogs"
+                    title="Material Usage Logs"
+                    description="A record of all materials used by club members."
+                    headers={['memberName', 'itemName', 'quantity', 'condition', 'notes', 'timestamp']}
+                    orderByField="timestamp"
+                    showDeleteAction={true}
+                    itemLimit={50}
+                />
+            </div>
         </TabsContent>
     </Tabs>
   </div>
@@ -134,13 +238,13 @@ const NormalMemberDashboard = ({ userProfile }: any) => (
         <MaterialLogForm />
       </CardContent>
     </Card>
-     <Card>
+      <Card>
       <CardHeader>
         <CardTitle>Recent Club Activity</CardTitle>
         <CardDescription>Stay up to date with the latest news.</CardDescription>
       </CardHeader>
       <CardContent>
-        <p>The latest club news and announcements will appear here.</p>
+        <RecentActivityFeed />
       </CardContent>
     </Card>
   </div>
@@ -151,11 +255,15 @@ export default function DashboardPage() {
   const { user, userProfile, loading } = useAuth();
   const router = useRouter();
 
+  // Read the login page URL from environment variables for consistent redirects
+  const loginPageUrl = process.env.NEXT_PUBLIC_LOGIN_PAGE_URL || '/login';
+
   React.useEffect(() => {
     if (!loading && !user) {
-      router.push('/login');
+      // Use the environment variable for the redirect
+      router.push(loginPageUrl);
     }
-  }, [user, loading, router]);
+  }, [user, loading, router, loginPageUrl]);
 
   if (loading || !userProfile) {
     return (
@@ -182,7 +290,7 @@ export default function DashboardPage() {
 
   return (
     <div className="container py-12 px-4 md:px-6">
-       <div className="space-y-4 text-center mb-12">
+        <div className="space-y-4 text-center mb-12">
         <h1 className="text-4xl font-bold font-headline tracking-tighter sm:text-5xl">Member Dashboard</h1>
         <p className="max-w-[900px] mx-auto text-foreground/80 md:text-xl">
           Your personal hub for all club activities.

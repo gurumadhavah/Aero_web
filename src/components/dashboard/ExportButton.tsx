@@ -1,4 +1,3 @@
-// src/components/dashboard/ExportButton.tsx
 "use client";
 
 import { Button } from "@/components/ui/button";
@@ -11,16 +10,16 @@ import { Download } from "lucide-react";
 interface ExportButtonProps {
   collectionName: string;
   fileName: string;
+  orderByField?: string;
 }
 
-export function ExportButton({ collectionName, fileName }: ExportButtonProps) {
+export function ExportButton({ collectionName, fileName, orderByField = "submittedAt" }: ExportButtonProps) {
   const { toast } = useToast();
 
   const handleExport = async () => {
     toast({ title: "Exporting...", description: "Fetching data to export." });
     try {
-      // Fetch all documents from the specified collection
-      const q = query(collection(db, collectionName), orderBy("timestamp", "desc"));
+      const q = query(collection(db, collectionName), orderBy(orderByField, "desc"));
       const querySnapshot = await getDocs(q);
       const data = querySnapshot.docs.map(doc => doc.data());
 
@@ -29,10 +28,8 @@ export function ExportButton({ collectionName, fileName }: ExportButtonProps) {
         return;
       }
 
-      // Convert JSON to CSV
       const csv = await json2csv(data);
 
-      // Create a blob and trigger download
       const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
       const link = document.createElement("a");
       const url = URL.createObjectURL(blob);
@@ -47,7 +44,7 @@ export function ExportButton({ collectionName, fileName }: ExportButtonProps) {
 
     } catch (error) {
       console.error(`Error exporting ${collectionName}:`, error);
-      toast({ title: "Export Failed", description: "Could not export the data.", variant: "destructive" });
+      toast({ title: "Export Failed", description: "Could not export the data. Please check console for missing index.", variant: "destructive" });
     }
   };
 

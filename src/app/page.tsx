@@ -6,6 +6,10 @@ import { ArrowRight, BrainCircuit, Hammer, Award } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 export default function Home() {
+  // --- Read environment variables ---
+  const backgroundImageUrl = process.env.NEXT_PUBLIC_BACKGROUND_IMAGE_URL;
+  const logoUrl = process.env.NEXT_PUBLIC_REAL_LOGO_URL;
+
   const testimonials = [
     {
       name: "Founder Name 1",
@@ -48,14 +52,17 @@ export default function Home() {
   return (
     <div className="flex flex-col min-h-[100dvh] overflow-x-hidden">
       <section className="relative w-full h-[80vh] min-h-[600px] flex items-center justify-center text-center">
-        <Image
-          src="/images/back2.png"
-          alt="Hero background"
-          layout="fill"
-          objectFit="cover"
-          className="absolute inset-0 z-0 opacity-80"
-          data-ai-hint="dark dramatic airplane"
-        />
+        {/* --- Use background image from environment variable --- */}
+        {backgroundImageUrl && (
+            <Image
+                src={backgroundImageUrl}
+                alt="Hero background"
+                layout="fill"
+                objectFit="cover"
+                className="absolute inset-0 z-0 opacity-80"
+                priority
+            />
+        )}
         <div className="relative z-10 container px-4 md:px-6 animate-fade-in-up">
           <h1 className="font-headline text-5xl font-bold tracking-tighter sm:text-6xl xl:text-7xl/none text-primary">
             SJEC Aero
@@ -78,7 +85,6 @@ export default function Home() {
         </div>
       </section>
 
-      {/* 👇 PADDING REDUCED ON THIS SECTION 👇 */}
       <section id="about" className="w-full py-12 md:py-20 bg-background">
         <div className="container px-4 md:px-6">
           <div className="grid md:grid-cols-2 gap-12 items-center">
@@ -92,21 +98,22 @@ export default function Home() {
               </p>
             </div>
             <div className="animate-fade-in-up" style={{ animationDelay: '0.4s' }}>
-              <Image
-                src="/images/reallogo.JPG"
-                width="600"
-                height="400"
-                alt="About Us Image"
-                data-ai-hint="students working drone"
-                className="rounded-xl shadow-2xl"
-              />
+              {/* --- Use logo image from environment variable --- */}
+              {logoUrl && (
+                <Image
+                    src={logoUrl}
+                    width="600"
+                    height="400"
+                    alt="About Us Image"
+                    className="rounded-xl shadow-2xl"
+                />
+              )}
             </div>
           </div>
         </div>
       </section>
 
-       {/* 👇 PADDING REDUCED ON THIS SECTION 👇 */}
-       <section id="why-join" className="w-full py-12 md:py-20 bg-secondary/50">
+      <section id="why-join" className="w-full py-12 md:py-20 bg-secondary/50">
         <div className="container px-4 md:px-6">
           <div className="flex flex-col items-center justify-center space-y-4 text-center animate-fade-in-up">
             <div className="space-y-2">
@@ -128,7 +135,6 @@ export default function Home() {
         </div>
       </section>
 
-      {/* 👇 PADDING REDUCED ON THIS SECTION 👇 */}
       <section id="testimonials" className="w-full py-12 md:py-20">
         <div className="container px-4 md:px-6">
           <div className="flex flex-col items-center justify-center space-y-4 text-center animate-fade-in-up">
@@ -159,7 +165,6 @@ export default function Home() {
         </div>
       </section>
 
-      {/* 👇 PADDING REDUCED ON THIS SECTION 👇 */}
       <section id="contact" className="w-full py-12 md:py-20 bg-secondary/50">
         <div className="container grid items-center justify-center gap-4 px-4 text-center md:px-6 animate-fade-in-up">
           <div className="space-y-3">

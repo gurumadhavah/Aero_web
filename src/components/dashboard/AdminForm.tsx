@@ -42,7 +42,7 @@ export function AdminForm({ collectionName, formSchema, fields, formTitle, onSub
       });
       toast({ title: "Success!", description: `${formTitle} has been added.` });
       form.reset();
-      onSubmitted(); // 👈 Call the function here to refresh the list
+      onSubmitted();
     } catch (error) {
       console.error("Error adding document: ", error);
       toast({ title: "Error", description: "Could not add the document.", variant: "destructive" });

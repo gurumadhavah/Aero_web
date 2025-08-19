@@ -10,18 +10,26 @@ import { createUserWithEmailAndPassword } from "firebase/auth";
 import { doc, setDoc, collection, query, where, getDocs } from "firebase/firestore";
 import { useRouter } from "next/navigation";
 import { useToast } from "@/hooks/use-toast";
+import { FirebaseError } from "firebase/app";
 
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
 
+// --- Read environment variables with fallbacks ---
+const allowedDomain = process.env.NEXT_PUBLIC_ALLOWED_EMAIL_DOMAIN || "@sjec.ac.in";
+const defaultUserRole = process.env.NEXT_PUBLIC_DEFAULT_USER_ROLE || "normal";
+const loginRedirectUrl = process.env.NEXT_PUBLIC_LOGIN_REDIRECT_URL || "/dashboard";
+const recruitmentPageUrl = process.env.NEXT_PUBLIC_RECRUITMENT_PAGE_URL || "/recruitment";
+const loginPageUrl = process.env.NEXT_PUBLIC_LOGIN_PAGE_URL || "/login";
+
 const formSchema = z.object({
   fullName: z.string().min(1, { message: "Full name is required." }),
   email: z.string().email({
     message: "Please enter a valid email address.",
-  }).refine(email => email.endsWith("@sjec.ac.in") || email.endsWith("@gmail.com"), {
-    message: "Email must be a valid @sjec.ac.in or @gmail.com address.",
+  }).refine(email => email.endsWith(allowedDomain) || email.endsWith("@gmail.com"), {
+    message: `Email must be a valid ${allowedDomain} or @gmail.com address.`,
   }),
   password: z.string().min(8, {
     message: "Password must be at least 8 characters.",
@@ -48,13 +56,12 @@ export default function RegisterPage() {
       const userSnapshot = await getDocs(userQuery);
 
       if (!userSnapshot.empty) {
-        // A user document already exists for this email.
         toast({
           title: "Account Exists",
           description: "This email address has already been registered. Please log in instead.",
           variant: "destructive",
         });
-        return; // Stop the process
+        return;
       }
 
       // Step 2: If not registered, check if they are on the pre-approved members list.
@@ -63,39 +70,45 @@ export default function RegisterPage() {
       const memberSnapshot = await getDocs(memberQuery);
 
       if (memberSnapshot.empty) {
-        // Not an approved member, redirect them to the recruitment form.
         toast({
           title: "Not a Pre-approved Member",
-          description: "This email is not on our members list. Please fill out the form to join our team.",
+          description: "This email is not on our members list. Redirecting to the recruitment form.",
           variant: "destructive",
         });
-        router.push("/recruitment");
-        return; // Stop the process
+        router.push(recruitmentPageUrl);
+        return;
       }
 
       // Step 3: If checks pass, proceed with creating the new user.
       const userCredential = await createUserWithEmailAndPassword(auth, values.email, values.password);
       const user = userCredential.user;
 
-      // Add their details to the 'users' collection.
       await setDoc(doc(db, "users", user.uid), {
         uid: user.uid,
         fullName: values.fullName,
         email: values.email,
-        role: "normal" // Assign a default role
+        role: defaultUserRole // Assign a default role from .env
       });
 
       toast({
         title: "Registration Successful!",
         description: "Welcome! You are now being redirected to the dashboard.",
       });
-      router.push("/dashboard");
+      router.push(loginRedirectUrl);
 
-    } catch (error: any) {
+    } catch (error) {
       console.error("Error during registration:", error);
+      
+      let description = "Could not complete registration. Please try again.";
+      if (error instanceof FirebaseError) {
+        if (error.code === 'auth/email-already-in-use') {
+            description = "This email is already associated with an account. Please log in instead.";
+        }
+      }
+
       toast({
-        title: "An Error Occurred",
-        description: "Could not complete registration. Please try again.",
+        title: "Registration Failed",
+        description: description,
         variant: "destructive",
       });
     }
@@ -112,19 +125,19 @@ export default function RegisterPage() {
       <CardContent>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="grid gap-4">
-             <FormField
-              control={form.control}
-              name="fullName"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Full Name</FormLabel>
-                  <FormControl>
-                    <Input placeholder="John Doe" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+              <FormField
+                control={form.control}
+                name="fullName"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Full Name</FormLabel>
+                    <FormControl>
+                      <Input placeholder="John Doe" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
             <FormField
               control={form.control}
               name="email"
@@ -151,14 +164,14 @@ export default function RegisterPage() {
                 </FormItem>
               )}
             />
-            <Button type="submit" className="w-full mt-2 bg-primary hover:bg-primary/90 text-primary-foreground">
-              Create Account
+            <Button type="submit" className="w-full mt-2 bg-primary hover:bg-primary/90 text-primary-foreground" disabled={form.formState.isSubmitting}>
+              {form.formState.isSubmitting ? "Creating Account..." : "Create Account"}
             </Button>
           </form>
         </Form>
         <div className="mt-4 text-center text-sm">
           Already have an account?{" "}
-          <Link href="/login" className="underline text-primary">
+          <Link href={loginPageUrl} className="underline text-primary">
             Login
           </Link>
         </div>

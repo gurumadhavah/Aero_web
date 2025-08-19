@@ -1,4 +1,3 @@
-// src/components/dashboard/DocumentUploadForm.tsx
 "use client";
 
 import { useForm } from "react-hook-form";
@@ -16,7 +15,6 @@ import { useAuth } from "@/context/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import { useState } from "react";
 
-// 👇 Updated Schema for better type safety with file inputs
 const formSchema = z.object({
   documentName: z.string().min(3, { message: "Document name must be at least 3 characters." }),
   description: z.string().optional(),
@@ -31,7 +29,11 @@ export function DocumentUploadForm() {
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
-    defaultValues: { documentName: "", description: "" },
+    defaultValues: {
+      documentName: "",
+      description: "",
+      file: undefined, // THE FIX (Part 1): Add a default value for the file
+    },
   });
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
@@ -53,6 +55,7 @@ export function DocumentUploadForm() {
       
       const uploadTask = await uploadBytes(storageRef, values.file);
       const downloadURL = await getDownloadURL(uploadTask.ref);
+      setUploadProgress(100);
 
       await addDoc(collection(db, "documents"), {
         documentName: values.documentName,
@@ -73,10 +76,7 @@ export function DocumentUploadForm() {
       setIsUploading(false);
     }
   }
-
-  // 👇 Create a ref for the file input
-  const fileRef = form.register("file");
-
+  
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
@@ -95,7 +95,6 @@ export function DocumentUploadForm() {
           </FormItem>
         )} />
         
-        {/* 👇 This is the corrected file input field */}
         <FormField
             control={form.control}
             name="file"
@@ -105,7 +104,7 @@ export function DocumentUploadForm() {
                 <FormControl>
                     <Input
                     type="file"
-                    {...fileRef} // Use the ref from form.register
+                    // THE FIX (Part 3): Remove the {...fileRef} prop
                     onChange={(event) => {
                         field.onChange(event.target.files ? event.target.files[0] : undefined);
                     }}

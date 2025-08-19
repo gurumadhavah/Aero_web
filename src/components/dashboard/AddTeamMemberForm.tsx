@@ -36,7 +36,7 @@ export function AddTeamMemberForm({ onMemberAdded }: { onMemberAdded: () => void
       email: "",
       role: "",
       status: "member",
-      id: 100,
+      id: 0,
       LinkedIn: "",
       avatarFile: undefined,
     },

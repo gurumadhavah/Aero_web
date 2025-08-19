@@ -1,20 +1,16 @@
-// src/app/recruitment/page.tsx
 "use client";
 
 import * as React from "react";
-import Link from "next/link";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { db } from "@/lib/firebase"; 
-import { collection, addDoc, getDocs, query, where } from "firebase/firestore"; 
-
+import { db } from "@/lib/firebase";
+import { collection, addDoc, doc, getDoc, serverTimestamp } from "firebase/firestore";
 import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
   CardDescription,
-  CardFooter,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
@@ -30,7 +26,6 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 
-// 👇 UPDATE THIS SCHEMA 👇
 const formSchema = z.object({
   fullName: z.string().min(1, { message: "Full name is required." }),
   email: z.string().email({
@@ -45,6 +40,10 @@ const formSchema = z.object({
 
 export default function RecruitmentPage() {
   const { toast } = useToast();
+  const [isSubmitting, setIsSubmitting] = React.useState(false);
+  const [isRecruitmentActive, setIsRecruitmentActive] = React.useState(false);
+  const [isLoading, setIsLoading] = React.useState(true);
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -56,35 +55,53 @@ export default function RecruitmentPage() {
     },
   });
 
+  React.useEffect(() => {
+    const fetchRecruitmentStatus = async () => {
+      try {
+        const docRef = doc(db, "settings", "recruitment");
+        const docSnap = await getDoc(docRef);
+        if (docSnap.exists() && docSnap.data().active === true) {
+          setIsRecruitmentActive(true);
+        } else {
+          setIsRecruitmentActive(false);
+        }
+      } catch (error) {
+        console.error("Error fetching recruitment status:", error);
+        setIsRecruitmentActive(false);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchRecruitmentStatus();
+  }, []);
+
   async function onSubmit(values: z.infer<typeof formSchema>) {
+    setIsSubmitting(true);
     try {
-        await addDoc(collection(db, "recruitment"), values);
+        await addDoc(collection(db, "recruitment"), {
+            ...values,
+            submittedAt: serverTimestamp(),
+        });
         toast({
           title: "Application Submitted!",
           description: "Thank you for your interest. We will get back to you soon.",
-          variant: "default",
         });
         form.reset();
     } catch (error) {
         console.error("Error adding document: ", error);
+        toast({
+          title: "Submission Failed",
+          description: "Could not submit your application. Please try again.",
+          variant: "destructive",
+        });
+    } finally {
+        setIsSubmitting(false);
     }
   }
 
-  const [isRecruitmentActive, setIsRecruitmentActive] = React.useState(true);
-
-  React.useEffect(() => {
-      const fetchRecruitmentStatus = async () => {
-          const settingsCollection = collection(db, "settings");
-          const q = query(settingsCollection, where("name", "==", "recruitment"));
-          const querySnapshot = await getDocs(q);
-          if (!querySnapshot.empty) {
-              const settingsDoc = querySnapshot.docs[0].data();
-              setIsRecruitmentActive(settingsDoc.active);
-          }
-      };
-      fetchRecruitmentStatus();
-  }, []);
-
+  if (isLoading) {
+    return <div className="container py-12 text-center">Loading...</div>;
+  }
 
   if (!isRecruitmentActive) {
     return (
@@ -167,22 +184,22 @@ export default function RecruitmentPage() {
                   )}
                 />
               </div>
-               <FormField
-                  control={form.control}
-                  name="reason"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Why do you want to join SJECAero?</FormLabel>
-                      <FormControl>
-                        <Textarea placeholder="Tell us about your passion for aerospace, relevant skills, or what you hope to learn." {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                 <Button type="submit" className="w-full mt-2 bg-primary hover:bg-primary/90 text-primary-foreground" size="lg">
-                    Submit Application
-                </Button>
+              <FormField
+                control={form.control}
+                name="reason"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Why do you want to join SJECAero?</FormLabel>
+                    <FormControl>
+                      <Textarea placeholder="Tell us about your passion for aerospace, relevant skills, or what you hope to learn." {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <Button type="submit" disabled={isSubmitting} className="w-full mt-2 bg-primary hover:bg-primary/90 text-primary-foreground" size="lg">
+                {isSubmitting ? "Submitting..." : "Submit Application"}
+              </Button>
             </form>
           </Form>
         </CardContent>
