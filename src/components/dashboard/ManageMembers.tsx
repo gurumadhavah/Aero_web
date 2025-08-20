@@ -1,4 +1,3 @@
-// src/components/dashboard/ManageMembers.tsx
 "use client";
 
 import * as React from "react";
@@ -18,10 +17,10 @@ import { Badge } from "@/components/ui/badge";
 
 // Combined interface for all members
 interface MemberProfile {
-  uid?: string; // Optional: only registered users have this
+  uid?: string;
   email: string;
   fullName: string;
-  role: 'captain' | 'core' | 'normal' | 'unregistered'; // Added unregistered role
+  role: 'captain' | 'core' | 'normal' | 'unregistered';
   registered: boolean;
 }
 
@@ -31,28 +30,26 @@ export function ManageMembers() {
   const [reason, setReason] = React.useState("");
   const [loading, setLoading] = React.useState(true);
 
+  // --- Read environment variable with a fallback ---
+  const removeUserFunctionUrl = process.env.NEXT_PUBLIC_REMOVE_USER_FUNCTION_URL;
+
   const fetchMembers = React.useCallback(async () => {
     setLoading(true);
     try {
-      // 1. Fetch all pre-approved members
       const membersSnapshot = await getDocs(collection(db, "members"));
       const allMembersData = membersSnapshot.docs.map(doc => ({ ...doc.data(), email: doc.id })) as { email: string, name: string, registered: boolean }[];
 
-      // 2. Fetch all registered users
       const usersSnapshot = await getDocs(collection(db, "users"));
       const registeredUsersData = usersSnapshot.docs.map(doc => doc.data() as { uid: string, email: string, fullName: string, role: 'captain' | 'core' | 'normal' });
       
-      // 3. Merge the two lists
       const combinedMembers = allMembersData.map(member => {
         const registeredUser = registeredUsersData.find(user => user.email === member.email);
         if (registeredUser) {
-          // If member is registered, use their full profile from 'users'
           return { ...registeredUser, registered: true };
         } else {
-          // If not registered, create a profile with default values
           return {
             email: member.email,
-            fullName: member.name, // Use the name stored in 'members'
+            fullName: member.name,
             role: 'unregistered' as const,
             registered: false
           };
@@ -90,6 +87,11 @@ export function ManageMembers() {
       return;
     }
     
+    if (!removeUserFunctionUrl) {
+        toast({ title: "Configuration Error", description: "The remove user function URL is not set.", variant: "destructive" });
+        return;
+    }
+
     setLoading(true);
     try {
       const auth = getAuth();
@@ -97,11 +99,8 @@ export function ManageMembers() {
       if (!currentUser) throw new Error("You must be logged in.");
 
       const token = await currentUser.getIdToken();
-      // This function now needs to handle both registered and unregistered users
-      // Pass uidToRemove if it exists, otherwise the backend can handle removal from 'members'
-      const functionUrl = "https://us-central1-sjecaero.cloudfunctions.net/removeUserHTTP";
-
-      const response = await fetch(functionUrl, {
+      
+      const response = await fetch(removeUserFunctionUrl, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

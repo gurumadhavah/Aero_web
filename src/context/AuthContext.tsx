@@ -1,11 +1,10 @@
-// src/context/AuthContext.tsx
 "use client";
 
 import * as React from 'react';
 import { onAuthStateChanged, User } from 'firebase/auth';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { auth, db } from '@/lib/firebase';
-import Image from 'next/image'; // 👈 Import the Image component
+import Image from 'next/image';
 
 interface UserProfile {
   uid: string;
@@ -26,6 +25,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = React.useState<User | null>(null);
   const [userProfile, setUserProfile] = React.useState<UserProfile | null>(null);
   const [loading, setLoading] = React.useState(true);
+  
+  // --- Read environment variables with fallbacks ---
+  const defaultUserRole = (process.env.NEXT_PUBLIC_DEFAULT_USER_ROLE || "normal") as 'captain' | 'core' | 'normal';
+  const logoUrl = process.env.NEXT_PUBLIC_LOGO_URL;
 
   React.useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
@@ -36,11 +39,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         if (userDoc.exists()) {
           setUserProfile(userDoc.data() as UserProfile);
         } else {
+          // --- Use environment variable for the default role ---
           const defaultProfile: UserProfile = {
             uid: currentUser.uid,
             email: currentUser.email,
             fullName: currentUser.displayName || "New Member",
-            role: "normal",
+            role: defaultUserRole,
           };
           await setDoc(userDocRef, defaultProfile);
           setUserProfile(defaultProfile);
@@ -50,28 +54,31 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         setUser(null);
         setUserProfile(null);
       }
-      // Add a small delay to prevent flickering on fast connections
       setTimeout(() => setLoading(false), 500);
     });
 
     return () => unsubscribe();
-  }, []);
+  // Added defaultUserRole to the dependency array
+  }, [defaultUserRole]);
 
   const value = { user, userProfile, loading };
 
-  // 👇 This is the updated loading screen
   if (loading) {
     return (
         <div className="flex items-center justify-center h-screen bg-background">
             <div className="relative flex items-center justify-center">
                 <div className="spinner"></div>
-                <Image 
-                    src="/images/logo.png" 
-                    alt="SJECAero Logo" 
-                    width={80} 
-                    height={80}
-                    className="rounded-full" // Optional: if your logo looks better rounded
-                />
+                {/* --- Use logo from environment variable for the loading screen --- */}
+                {logoUrl && (
+                  <Image 
+                      src={logoUrl} 
+                      alt="SJECAero Logo" 
+                      width={80} 
+                      height={80}
+                      className="rounded-full"
+                      priority
+                  />
+                )}
             </div>
         </div>
     );

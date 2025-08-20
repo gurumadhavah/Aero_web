@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { db } from "@/lib/firebase";
-import { collection, getDocs, query, orderBy, limit } from "firebase/firestore";
+import { collection, getDocs, query, orderBy, limit, onSnapshot } from "firebase/firestore";
 import { Skeleton } from "@/components/ui/skeleton";
 import { format } from 'date-fns';
 
@@ -18,22 +18,21 @@ export function RecentActivityFeed() {
   const [loading, setLoading] = React.useState(true);
 
   React.useEffect(() => {
-    const fetchAnnouncements = async () => {
-      try {
-        // Query to get the 3 most recent announcements
-        const q = query(collection(db, "announcements"), orderBy("createdAt", "desc"), limit(3));
-        const querySnapshot = await getDocs(q);
-        const data = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Announcement));
-        setAnnouncements(data);
-      } catch (error) {
-        console.error("Error fetching announcements:", error);
-        // This is often caused by a missing Firestore index.
-        // Check the browser console for a URL to create the index.
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchAnnouncements();
+    // This query gets the 3 most recent announcements
+    const q = query(collection(db, "announcements"), orderBy("createdAt", "desc"), limit(3));
+
+    // Use onSnapshot to listen for real-time updates
+    const unsubscribe = onSnapshot(q, (querySnapshot) => {
+      const data = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Announcement));
+      setAnnouncements(data);
+      setLoading(false);
+    }, (error) => {
+      console.error("Error fetching real-time announcements:", error);
+      setLoading(false);
+    });
+
+    // Cleanup the listener when the component is no longer on screen
+    return () => unsubscribe();
   }, []);
 
   if (loading) {

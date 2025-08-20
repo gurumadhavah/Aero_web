@@ -1,28 +1,34 @@
-// src/components/layout/footer.tsx
 import Image from 'next/image';
 import { Linkedin, Mail, MapPin, Instagram } from 'lucide-react';
 import Link from 'next/link';
 
 export default function Footer() {
+  // --- Read environment variables with fallbacks ---
+  const logoUrl = process.env.NEXT_PUBLIC_LOGO_URL;
+  const contactEmail = process.env.NEXT_PUBLIC_CONTACT_EMAIL;
+  const collegeName = process.env.NEXT_PUBLIC_COLLEGE_NAME;
+  const collegeLocationText = process.env.NEXT_PUBLIC_COLLEGE_LOCATION_TEXT;
+  const mapsUrl = process.env.NEXT_PUBLIC_MAPS_URL;
+  const linkedinUrl = process.env.NEXT_PUBLIC_LINKEDIN_URL;
+  const instagramUrl = process.env.NEXT_PUBLIC_INSTAGRAM_URL;
+
   return (
     <footer id="contact-info" className="w-full bg-secondary/30 border-t border-border/40">
       <div className="container py-12 px-4 md:px-6">
         <div className="grid gap-10 md:grid-cols-12">
           <div className="md:col-span-4 flex flex-col gap-4">
             <Link href="/" className="flex items-center space-x-2">
-              <Image src="/images/logo.png" alt="SJECAero Logo" width={120} height={40} />
-              <p className="text-sm text-foreground/70">St. Joseph Engineering College 
-              Vamanjoor
-              Mangaluru - 575028</p>
+              {/* Use logo from environment variable */}
+              {logoUrl && <Image src={logoUrl} alt="SJECAero Logo" width={120} height={40} />}
             </Link>
             <p className="text-sm text-foreground/70 max-w-xs">
-              Designing, building, and flying the future of aerospace technology at SJEC.
+                Designing, building, and flying the future of aerospace technology at SJEC.
             </p>
              <div className="flex space-x-4 mt-2">
-                <Link href="https://www.linkedin.com/company/sjec-aero/posts/?feedView=all" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn" className="text-foreground/70 hover:text-primary transition-colors">
-                  <Linkedin className="h-6 w-6" />
+                <Link href={linkedinUrl || "#"} target="_blank" rel="noopener noreferrer" aria-label="LinkedIn" className="text-foreground/70 hover:text-primary transition-colors">
+                    <Linkedin className="h-6 w-6" />
                 </Link>
-                <Link href="https://www.instagram.com/sjec_aero/" target='_blank' aria-label="Instagram" className="text-foreground/70 hover:text-primary transition-colors">
+                <Link href={instagramUrl || "#"} target='_blank' aria-label="Instagram" className="text-foreground/70 hover:text-primary transition-colors">
                     <Instagram className="h-6 w-6" />
                 </Link>
               </div>
@@ -54,8 +60,8 @@ export default function Footer() {
                     <div>
                         <span className="font-semibold">Email</span>
                         <br/>
-                        <Link href="mailto:team.aero@sjec.ac.in" className="text-foreground/70 hover:text-primary transition-colors">
-                            team.aero@sjec.ac.in
+                        <Link href={`mailto:${contactEmail}`} className="text-foreground/70 hover:text-primary transition-colors">
+                            {contactEmail}
                         </Link>
                     </div>
                 </li>
@@ -64,8 +70,8 @@ export default function Footer() {
                     <div>
                         <span className="font-semibold">Location</span>
                         <br/>
-                        <Link href="https://maps.app.goo.gl/mdzLGFHTdY29koda6" target="_blank" rel="noopener noreferrer" className="text-foreground/70 hover:text-primary transition-colors">
-                            SJEC, Mangalore
+                        <Link href={mapsUrl || "#"} target="_blank" rel="noopener noreferrer" className="text-foreground/70 hover:text-primary transition-colors">
+                            {collegeName}, {collegeLocationText}
                         </Link>
                     </div>
                 </li>

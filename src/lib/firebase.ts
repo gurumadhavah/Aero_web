@@ -6,14 +6,14 @@ import { getFirestore } from "firebase/firestore";
 import { getStorage } from "firebase/storage";
 import { getFunctions } from "firebase/functions";
 
+// Read Firebase config from environment variables
 const firebaseConfig = {
-  apiKey: "AIzaSyD_-MLWcpdSJVUSB2AqmO3JHs8nf_cRD44",
-  authDomain: "sjecaero.firebaseapp.com",
-  projectId: "sjecaero",
-  // THE FIX: Use the correct bucket name we found earlier
-  storageBucket: "sjecaero.firebasestorage.app", 
-  messagingSenderId: "887440722897",
-  appId: "1:887440722897:web:96d02e2e7c45ceb81c2ef0"
+  apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
+  authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
+  projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
+  storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
+  appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID
 };
 
 // Initialize Firebase App
