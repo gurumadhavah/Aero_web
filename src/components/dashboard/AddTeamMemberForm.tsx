@@ -63,17 +63,26 @@ export function AddTeamMemberForm({ onMemberAdded }: { onMemberAdded: () => void
         LinkedIn: values.LinkedIn,
         aiHint: `A photo of ${values.name}, who is a ${values.role}.`
       });
+      
+      // Only add core and current members to the registration list.
+      if (values.status !== 'alumni') {
+        await setDoc(doc(db, "members", values.email), {
+          email: values.email,
+          name: values.name,
+          registered: false
+        });
+        toast({
+          title: "Member Added Successfully!",
+          description: `${values.name} has been added to the team and can now register.`,
+        });
+      } else {
+        // Show a different message for alumni
+        toast({
+          title: "Alumni Added Successfully!",
+          description: `${values.name} has been added to the team roster as an alumnus.`,
+        });
+      }
 
-      await setDoc(doc(db, "members", values.email), {
-        email: values.email,
-        name: values.name,
-        registered: false
-      });
-
-      toast({
-        title: "Member Added Successfully!",
-        description: `${values.name} has been added to the team and can now register.`,
-      });
       form.reset();
       onMemberAdded();
     } catch (error) {
