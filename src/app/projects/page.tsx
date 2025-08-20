@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Dialog,
   DialogContent,
@@ -15,14 +15,13 @@ import { db } from "@/lib/firebase";
 import { collection, getDocs, query, orderBy } from "firebase/firestore";
 import { Skeleton } from "@/components/ui/skeleton";
 
+// ✅ **MODIFIED**: Interface updated to match the Firestore data structure
 interface Project {
   id: string;
   title: string;
-  category: string;
   description: string;
-  fullDescription: string;
+  status: 'ongoing' | 'completed';
   imageUrl: string;
-  aiHint: string;
 }
 
 export default function ProjectsPage() {
@@ -32,8 +31,8 @@ export default function ProjectsPage() {
   React.useEffect(() => {
     const fetchProjects = async () => {
       try {
-        // You can add an orderBy clause if you have a sortId field
-        const q = query(collection(db, "projects"));
+        // ✅ **MODIFIED**: Query now sorts by the 'createdAt' field in descending order
+        const q = query(collection(db, "projects"), orderBy("createdAt", "desc"));
         const querySnapshot = await getDocs(q);
         const projectsData = querySnapshot.docs.map(doc => ({
           id: doc.id,
@@ -63,12 +62,12 @@ export default function ProjectsPage() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {Array.from({ length: 3 }).map((_, index) => (
              <Card key={index}>
-                <Skeleton className="h-48 w-full" />
-                <CardContent className="p-6 space-y-2">
-                    <Skeleton className="h-4 w-1/4" />
-                    <Skeleton className="h-6 w-3/4" />
-                    <Skeleton className="h-4 w-full" />
-                </CardContent>
+               <Skeleton className="h-48 w-full" />
+               <CardContent className="p-6 space-y-2">
+                   <Skeleton className="h-4 w-1/4" />
+                   <Skeleton className="h-6 w-3/4" />
+                   <Skeleton className="h-4 w-full" />
+               </CardContent>
              </Card>
           ))}
         </div>
@@ -94,30 +93,28 @@ export default function ProjectsPage() {
                       width={600}
                       height={400}
                       className="aspect-video object-cover"
-                      data-ai-hint={project.aiHint}
                     />
                   </CardHeader>
                   <CardContent className="p-6">
-                    <p className="text-sm text-primary font-semibold">{project.category}</p>
+                    <p className={`text-sm font-semibold capitalize ${project.status === 'ongoing' ? 'text-yellow-600' : 'text-green-600'}`}>{project.status}</p>
                     <CardTitle className="text-xl font-headline mt-1">{project.title}</CardTitle>
-                    <p className="text-muted-foreground mt-2 text-sm">{project.description}</p>
+                    <p className="text-muted-foreground mt-2 text-sm line-clamp-3">{project.description}</p>
                   </CardContent>
                 </Card>
               </DialogTrigger>
               <DialogContent className="max-w-3xl bg-card border-primary/20">
                 <DialogHeader className="text-left">
-                   <Image
+                    <Image
                       src={project.imageUrl}
                       alt={project.title}
                       width={800}
                       height={450}
                       className="aspect-video object-cover rounded-md mb-4"
-                      data-ai-hint={project.aiHint}
                     />
                   <DialogTitle className="text-3xl font-headline text-primary">{project.title}</DialogTitle>
                   <DialogDescription asChild>
                     <div className="text-base text-foreground/90 pt-4">
-                        <p>{project.fullDescription}</p>
+                        <p>{project.description}</p>
                     </div>
                   </DialogDescription>
                 </DialogHeader>

@@ -110,5 +110,20 @@
     right: 0;
     transform: translateX(50%);
   }
-  /* --- END: New timeline styles --- */
+  
+@keyframes scroll {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+.animate-scroll {
+  display: flex; /* Ensure display is flex */
+  align-items: stretch; /* ✅ ADD THIS LINE */
+  animation: scroll 40s linear infinite;
+  white-space: nowrap;
+}
 }
