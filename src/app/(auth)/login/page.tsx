@@ -6,7 +6,8 @@ import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import * as z from "zod"
 import { auth } from "@/lib/firebase";
-import { signInWithEmailAndPassword } from "firebase/auth";
+// --- NEW: Import sendPasswordResetEmail ---
+import { signInWithEmailAndPassword, sendPasswordResetEmail } from "firebase/auth";
 import { useRouter } from "next/navigation";
 import { FirebaseError } from "firebase/app";
 
@@ -71,6 +72,35 @@ export default function LoginPage() {
     }
   }
 
+  // --- NEW: Function to handle the password reset ---
+  const handlePasswordReset = async () => {
+    const email = form.getValues("email");
+    if (!email) {
+      toast({
+        title: "Email Required",
+        description: "Please enter your email address in the email field first.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      await sendPasswordResetEmail(auth, email);
+      toast({
+        title: "Password Reset Email Sent",
+        description: `If an account exists for ${email}, you will receive an email with instructions to reset your password.`,
+      });
+    } catch (error) {
+      console.error("Password Reset Error:", error);
+      // We still show a generic success message for security, to avoid confirming if an email exists or not.
+      toast({
+        title: "Password Reset Email Sent",
+        description: `If an account exists for ${email}, you will receive an email with instructions to reset your password.`,
+      });
+    }
+  };
+
+
   return (
     <Card className="mx-auto max-w-sm w-full bg-card border-primary/20">
       <CardHeader>
@@ -100,7 +130,17 @@ export default function LoginPage() {
               name="password"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Password</FormLabel>
+                  {/* --- NEW: Added a div to place the "Forgot password?" link next to the label --- */}
+                  <div className="flex items-center">
+                    <FormLabel>Password</FormLabel>
+                    <button
+                      type="button" // Important: prevents form submission
+                      onClick={handlePasswordReset}
+                      className="ml-auto inline-block text-sm underline"
+                    >
+                      Forgot password?
+                    </button>
+                  </div>
                   <FormControl>
                     <Input type="password" placeholder="••••••••" {...field} />
                   </FormControl>

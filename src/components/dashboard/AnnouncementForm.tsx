@@ -32,7 +32,6 @@ export function AnnouncementForm() {
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setLoading(true);
     try {
-      // 1. Add announcement to Firestore, type is always 'club-only'
       await addDoc(collection(db, "announcements"), {
         title: values.title,
         content: values.content,

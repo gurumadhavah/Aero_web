@@ -1,11 +1,21 @@
 "use client";
 
+// --- MODIFICATION: Added useState ---
 import * as React from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Skeleton } from '@/components/ui/skeleton';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+
+// --- NEW: Import components for the Change Password feature ---
+import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { toast } from "@/hooks/use-toast";
+import { updatePassword } from "firebase/auth";
+
 
 // Form and View Components
 import { AnnouncementForm } from '@/components/dashboard/AnnouncementForm';
@@ -24,7 +34,6 @@ import { ViewSubmissions } from '@/components/dashboard/ViewSubmissions';
 import { ExportButton } from '@/components/dashboard/ExportButton';
 import { MaterialLogForm } from '@/components/dashboard/MaterialLogForm';
 import { RecentActivityFeed } from '@/components/dashboard/RecentActivityFeed';
-// ✅ **NEW**: Import Project components
 import { AddProjectForm } from '@/components/dashboard/AddProjectForm';
 import { ViewProjects } from '@/components/dashboard/ViewProjects';
 
@@ -59,10 +68,9 @@ const CaptainDashboard = ({ userProfile }: any) => {
                 </TabsContent>
                 <TabsContent value="content">
                     <div className="space-y-6">
-                        {/* ✅ **MODIFICATION**: Adjusted grid columns to 7 */}
                         <Tabs defaultValue="achievements" className="w-full">
                             <TabsList className="grid w-full grid-cols-7">
-                                <TabsTrigger value="projects">Projects</TabsTrigger> {/* ✅ **NEW** */}
+                                <TabsTrigger value="projects">Projects</TabsTrigger>
                                 <TabsTrigger value="achievements">Achievements</TabsTrigger>
                                 <TabsTrigger value="events">Events</TabsTrigger>
                                 <TabsTrigger value="gallery">Gallery</TabsTrigger>
@@ -71,7 +79,6 @@ const CaptainDashboard = ({ userProfile }: any) => {
                                 <TabsTrigger value="contact">Contact</TabsTrigger>
                             </TabsList>
                             
-                            {/* ✅ **NEW**: Projects Tab Content */}
                             <TabsContent value="projects">
                                 <div className="grid gap-8 pt-4">
                                     <Card>
@@ -197,17 +204,15 @@ const CoreMemberDashboard = ({ userProfile }: any) => {
                 </TabsList>
                 <TabsContent value="content">
                     <div className="space-y-6">
-                         {/* ✅ **MODIFICATION**: Adjusted grid columns to 5 */}
                         <Tabs defaultValue="achievements" className="w-full">
                             <TabsList className="grid w-full grid-cols-5">
-                                <TabsTrigger value="projects">Projects</TabsTrigger> {/* ✅ **NEW** */}
+                                <TabsTrigger value="projects">Projects</TabsTrigger>
                                 <TabsTrigger value="achievements">Achievements</TabsTrigger>
                                 <TabsTrigger value="events">Events</TabsTrigger>
                                 <TabsTrigger value="gallery">Gallery</TabsTrigger>
                                 <TabsTrigger value="documents">Documents</TabsTrigger>
                             </TabsList>
 
-                            {/* ✅ **NEW**: Projects Tab Content */}
                             <TabsContent value="projects">
                                 <div className="grid gap-8 pt-4">
                                      <Card>
@@ -272,8 +277,6 @@ const CoreMemberDashboard = ({ userProfile }: any) => {
     );
 };
 
-// ... (NormalMemberDashboard and the rest of the file remains the same)
-
 const NormalMemberDashboard = ({ userProfile }: any) => (
   <div className="grid md:grid-cols-2 gap-8">
     <Card>
@@ -302,6 +305,11 @@ export default function DashboardPage() {
   const { user, userProfile, loading } = useAuth();
   const router = useRouter();
 
+  // --- NEW: State for Change Password Dialog ---
+  const [isDialogOpen, setIsDialogOpen] = React.useState(false);
+  const [newPassword, setNewPassword] = React.useState("");
+  const [confirmPassword, setConfirmPassword] = React.useState("");
+
   // Read the login page URL from environment variables for consistent redirects
   const loginPageUrl = process.env.NEXT_PUBLIC_LOGIN_PAGE_URL || '/login';
 
@@ -312,11 +320,38 @@ export default function DashboardPage() {
     }
   }, [user, loading, router, loginPageUrl]);
 
+  // --- NEW: Function to handle password change ---
+  const handleChangePassword = async () => {
+    if (newPassword !== confirmPassword) {
+      toast({ title: "Error", description: "Passwords do not match.", variant: "destructive" });
+      return;
+    }
+    if (newPassword.length < 6) {
+        toast({ title: "Error", description: "Password must be at least 6 characters long.", variant: "destructive" });
+        return;
+    }
+    if (!user) {
+        toast({ title: "Error", description: "You must be logged in to change your password.", variant: "destructive" });
+        return;
+    }
+
+    try {
+      await updatePassword(user, newPassword);
+      toast({ title: "Success", description: "Your password has been updated successfully." });
+      setIsDialogOpen(false);
+      setNewPassword("");
+      setConfirmPassword("");
+    } catch (error) {
+      console.error("Error updating password:", error);
+      toast({ title: "Error", description: "Could not update password. Please log out and log back in before trying again.", variant: "destructive" });
+    }
+  };
+
   if (loading || !userProfile) {
     return (
       <div className="container py-12 px-4 md:px-6">
-        <Skeleton className="h-8 w-1_3 mx-auto mb-4" />
-        <Skeleton className="h-4 w-1_2 mx-auto mb-12" />
+        <Skeleton className="h-8 w-1/3 mx-auto mb-4" />
+        <Skeleton className="h-4 w-1/2 mx-auto mb-12" />
         <Skeleton className="h-64 w-full" />
       </div>
     );
@@ -338,12 +373,57 @@ export default function DashboardPage() {
   return (
     <div className="container py-12 px-4 md:px-6">
         <div className="space-y-4 text-center mb-12">
-        <h1 className="text-4xl font-bold font-headline tracking-tighter sm:text-5xl">Member Dashboard</h1>
-        <p className="max-w-[900px] mx-auto text-foreground/80 md:text-xl">
-          Your personal hub for all club activities.
-        </p>
-      </div>
-      {renderDashboardByRole()}
+            {/* --- MODIFICATION: Added a flex container for title and button --- */}
+            <div className="flex justify-center items-center relative">
+                <h1 className="text-4xl font-bold font-headline tracking-tighter sm:text-5xl">Member Dashboard</h1>
+                {/* --- NEW: Change Password Button --- */}
+                <Button onClick={() => setIsDialogOpen(true)} className="absolute right-0 top-1/2 -translate-y-1/2">
+                    Change Password
+                </Button>
+            </div>
+            <p className="max-w-[900px] mx-auto text-foreground/80 md:text-xl">
+                Your personal hub for all club activities.
+            </p>
+        </div>
+        {renderDashboardByRole()}
+
+        {/* --- NEW: Change Password Dialog --- */}
+        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+            <DialogContent>
+                <DialogHeader>
+                    <DialogTitle>Change Your Password</DialogTitle>
+                </DialogHeader>
+                <div className="grid gap-4 py-4">
+                    <div className="grid grid-cols-4 items-center gap-4">
+                        <Label htmlFor="new-password" className="text-right">
+                            New Password
+                        </Label>
+                        <Input
+                            id="new-password"
+                            type="password"
+                            value={newPassword}
+                            onChange={(e) => setNewPassword(e.target.value)}
+                            className="col-span-3"
+                        />
+                    </div>
+                    <div className="grid grid-cols-4 items-center gap-4">
+                        <Label htmlFor="confirm-password" className="text-right">
+                            Confirm Password
+                        </Label>
+                        <Input
+                            id="confirm-password"
+                            type="password"
+                            value={confirmPassword}
+                            onChange={(e) => setConfirmPassword(e.target.value)}
+                            className="col-span-3"
+                        />
+                    </div>
+                </div>
+                <DialogFooter>
+                    <Button onClick={handleChangePassword}>Save Changes</Button>
+                </DialogFooter>
+            </DialogContent>
+        </Dialog>
     </div>
   );
 }
