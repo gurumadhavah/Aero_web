@@ -1,4 +1,4 @@
-import type {NextConfig} from 'next';
+import type { NextConfig } from 'next';
 
 const nextConfig: NextConfig = {
   /* config options here */
@@ -14,7 +14,8 @@ const nextConfig: NextConfig = {
         protocol: 'https',
         hostname: 'firebasestorage.googleapis.com',
         port: '',
-        pathname: '/v0/b/sjecaero.firebasestorage.app/o/**',
+        // This is the important change: '**' allows any path
+        pathname: '**', 
       },
     ],
   },
