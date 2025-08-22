@@ -74,7 +74,12 @@ export function ViewAchievements() {
       try {
         const q = query(collection(db, "achievements"), orderBy("sortId", "asc"));
         const querySnapshot = await getDocs(q);
-        const data = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Achievement));
+        const data = querySnapshot.docs
+          .map(doc => ({ id: doc.id, ...doc.data() } as Achievement))
+          // --- THIS IS THE FIX ---
+          // It ensures we only try to render items that have a valid imageUrl.
+          .filter(item => item.imageUrl && typeof item.imageUrl === 'string');
+
         setItems(data);
       } catch (error) {
         console.error("Error fetching achievements:", error);
@@ -254,7 +259,7 @@ export function ViewAchievements() {
               </div>
             </div>
           </form>
-           <DialogFooter>
+            <DialogFooter>
               <Button type="submit" form="edit-achievement-form" disabled={isUpdating}>
                 {isUpdating ? "Saving..." : "Save Changes"}
               </Button>

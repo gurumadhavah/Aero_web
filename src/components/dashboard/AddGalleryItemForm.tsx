@@ -57,7 +57,7 @@ export function AddGalleryItemForm({ onItemAdded }: { onItemAdded?: () => void }
       const storageRef = ref(storage, `gallery/${Date.now()}_${values.imageFile.name}`);
       const uploadTask = await uploadBytes(storageRef, values.imageFile);
       const downloadURL = await getDownloadURL(uploadTask.ref);
-
+      console.log("Generated Image URL during upload:", downloadURL);
       await addDoc(collection(db, "gallery"), {
         sortId: values.sortId,
         title: values.title,

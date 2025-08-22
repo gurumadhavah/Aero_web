@@ -15,7 +15,6 @@ import { db } from "@/lib/firebase";
 import { collection, getDocs, query, orderBy } from "firebase/firestore";
 import { Skeleton } from "@/components/ui/skeleton";
 
-// ✅ **MODIFIED**: Interface updated to match the Firestore data structure
 interface Project {
   id: string;
   title: string;
@@ -31,13 +30,17 @@ export default function ProjectsPage() {
   React.useEffect(() => {
     const fetchProjects = async () => {
       try {
-        // ✅ **MODIFIED**: Query now sorts by the 'createdAt' field in descending order
         const q = query(collection(db, "projects"), orderBy("createdAt", "desc"));
         const querySnapshot = await getDocs(q);
-        const projectsData = querySnapshot.docs.map(doc => ({
-          id: doc.id,
-          ...doc.data()
-        } as Project));
+        const projectsData = querySnapshot.docs
+          .map(doc => ({
+            id: doc.id,
+            ...doc.data()
+          } as Project))
+          // --- THIS IS THE FIX ---
+          // It ensures we only try to render items that have a valid imageUrl.
+          .filter(item => item.imageUrl && typeof item.imageUrl === 'string');
+
         setProjects(projectsData);
       } catch (error) {
         console.error("Error fetching projects:", error);
@@ -61,25 +64,25 @@ export default function ProjectsPage() {
       {loading ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {Array.from({ length: 3 }).map((_, index) => (
-             <Card key={index}>
-               <Skeleton className="h-48 w-full" />
-               <CardContent className="p-6 space-y-2">
-                   <Skeleton className="h-4 w-1/4" />
-                   <Skeleton className="h-6 w-3/4" />
-                   <Skeleton className="h-4 w-full" />
-               </CardContent>
-             </Card>
+               <Card key={index}>
+                 <Skeleton className="h-48 w-full" />
+                 <CardContent className="p-6 space-y-2">
+                     <Skeleton className="h-4 w-1/4" />
+                     <Skeleton className="h-6 w-3/4" />
+                     <Skeleton className="h-4 w-full" />
+                 </CardContent>
+               </Card>
           ))}
         </div>
       ) : projects.length === 0 ? (
-         <Card>
-          <CardHeader>
-            <CardTitle>Content Coming Soon</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p>This page will showcase the club's projects, rendered dynamically from our records. Check back soon for updates!</p>
-          </CardContent>
-        </Card>
+           <Card>
+            <CardHeader>
+              <CardTitle>Content Coming Soon</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p>This page will showcase the club's projects, rendered dynamically from our records. Check back soon for updates!</p>
+            </CardContent>
+          </Card>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {projects.map((project) => (

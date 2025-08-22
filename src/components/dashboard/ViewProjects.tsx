@@ -33,7 +33,12 @@ export function ViewProjects() {
     try {
       const q = query(collection(db, "projects"), orderBy("createdAt", "desc"));
       const querySnapshot = await getDocs(q);
-      const projectsData = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Project));
+      const projectsData = querySnapshot.docs
+        .map(doc => ({ id: doc.id, ...doc.data() } as Project))
+        // --- THIS IS THE FIX ---
+        // It ensures we only try to render items that have a valid imageUrl.
+        .filter(item => item.imageUrl && typeof item.imageUrl === 'string');
+        
       setProjects(projectsData);
     } catch (error) {
       toast({ title: "Error", description: "Could not fetch projects.", variant: "destructive" });
@@ -107,12 +112,12 @@ export function ViewProjects() {
                           <Input value={editingProject.title} onChange={(e) => setEditingProject({ ...editingProject, title: e.target.value })} />
                           <Textarea value={editingProject.description} onChange={(e) => setEditingProject({ ...editingProject, description: e.target.value })} />
                            <Select value={editingProject.status} onValueChange={(value: 'ongoing' | 'completed') => setEditingProject({ ...editingProject, status: value })}>
-                                <SelectTrigger><SelectValue /></SelectTrigger>
-                                <SelectContent>
-                                    <SelectItem value="ongoing">Ongoing</SelectItem>
-                                    <SelectItem value="completed">Completed</SelectItem>
-                                </SelectContent>
-                            </Select>
+                               <SelectTrigger><SelectValue /></SelectTrigger>
+                               <SelectContent>
+                                   <SelectItem value="ongoing">Ongoing</SelectItem>
+                                   <SelectItem value="completed">Completed</SelectItem>
+                               </SelectContent>
+                           </Select>
                           <Button type="submit">Save Changes</Button>
                         </form>
                       )}

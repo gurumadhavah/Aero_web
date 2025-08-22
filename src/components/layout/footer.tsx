@@ -66,7 +66,7 @@ export default function Footer() {
                     </div>
                 </li>
                 <li className="flex items-start gap-3">
-                    <MapPin className="h-5 w-5 mt-0.5 text-primary" />
+                    <MapPin className="h-8 w-8 mt-0.5 text-primary" />
                     <div>
                         <span className="font-semibold">Location</span>
                         <br/>
@@ -80,7 +80,7 @@ export default function Footer() {
           </div>
         </div>
         <div className="mt-10 pt-8 border-t border-border/40 text-center text-sm text-foreground/60">
-          <p>© {new Date().getFullYear()} SJECAero - SJEC AERO Club. All Rights Reserved.</p>
+          <p>© {new Date().getFullYear()} SJEC Aero - SJEC AERO Club. All Rights Reserved.</p>
         </div>
       </div>
     </footer>

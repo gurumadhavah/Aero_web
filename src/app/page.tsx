@@ -20,7 +20,7 @@ interface FixedTestimonial {
   avatarUrl: string;
 }
 
-// ✅ **Centralized Environment Variables**
+// --- Centralized Environment Variables ---
 const envConfig = {
     backgroundImageUrl: process.env.NEXT_PUBLIC_BACKGROUND_IMAGE_URL,
     logoUrl: process.env.NEXT_PUBLIC_REAL_LOGO_URL,
@@ -40,10 +40,15 @@ export default function Home() {
             orderBy("createdAt")
         );
         const querySnapshot = await getDocs(q);
-        const data = querySnapshot.docs.map(doc => ({
-          id: doc.id,
-          ...doc.data()
-        } as FixedTestimonial));
+        const data = querySnapshot.docs
+          .map(doc => ({
+            id: doc.id,
+            ...doc.data()
+          } as FixedTestimonial))
+          // --- THIS IS THE FIX ---
+          // It ensures we only try to render testimonials that have a valid avatarUrl.
+          .filter(item => item.avatarUrl && typeof item.avatarUrl === 'string');
+
         setFixedTestimonials(data);
       } catch (error) {
         console.error("Error fetching fixed testimonials:", error);

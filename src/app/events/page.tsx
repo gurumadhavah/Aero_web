@@ -35,10 +35,15 @@ export default function EventsPage() {
           orderBy("date", "asc")
         );
         const querySnapshot = await getDocs(q);
-        const eventsData = querySnapshot.docs.map(doc => ({
-          id: doc.id,
-          ...doc.data()
-        } as Event));
+        const eventsData = querySnapshot.docs
+          .map(doc => ({
+            id: doc.id,
+            ...doc.data()
+          } as Event))
+          // --- THIS IS THE FIX ---
+          // It ensures we only try to render items that have a valid imageUrl.
+          .filter(item => item.imageUrl && typeof item.imageUrl === 'string');
+          
         setEvents(eventsData);
       } catch (error) {
         console.error("Error fetching events:", error);

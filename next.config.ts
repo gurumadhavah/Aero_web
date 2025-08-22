@@ -9,13 +9,19 @@ const nextConfig: NextConfig = {
     ignoreDuringBuilds: true,
   },
   images: {
+    // --- THIS IS THE CRUCIAL CHANGE ---
+    // This tells the Next.js <Image> component to serve the original,
+    // un-optimized image file directly, bypassing the optimizer service
+    // that seems to be failing.
+    unoptimized: true,
+    
+    // Your remotePatterns config is correct, but we'll leave it in.
     remotePatterns: [
       {
         protocol: 'https',
         hostname: 'firebasestorage.googleapis.com',
         port: '',
-        // This is the important change: '**' allows any path
-        pathname: '**', 
+        pathname: '**',
       },
     ],
   },

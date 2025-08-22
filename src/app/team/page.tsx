@@ -1,4 +1,3 @@
-// src/app/team/page.tsx
 "use client";
 
 import * as React from "react";
@@ -72,10 +71,14 @@ export default function TeamPage() {
         const q = query(collection(db, "team"), orderBy("id", "asc"));
         const querySnapshot = await getDocs(q);
         
-        const allMembers = querySnapshot.docs.map(doc => ({
-          id: doc.id,
-          ...doc.data()
-        } as TeamMember));
+        const allMembers = querySnapshot.docs
+          .map(doc => ({
+            id: doc.id,
+            ...doc.data()
+          } as TeamMember))
+          // --- THIS IS THE FIX ---
+          // It ensures we only try to render members that have a valid avatarUrl.
+          .filter(member => member.avatarUrl && typeof member.avatarUrl === 'string');
 
         // Filter members into their respective groups
         setCoreMembers(allMembers.filter(m => m.status === 'core'));

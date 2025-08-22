@@ -35,10 +35,15 @@ export default function GalleryPage() {
       try {
         const q = query(collection(db, "gallery"), orderBy("sortId", "asc"));
         const querySnapshot = await getDocs(q);
-        const itemsData = querySnapshot.docs.map(doc => ({
-          id: doc.id,
-          ...doc.data()
-        } as GalleryItem));
+        const itemsData = querySnapshot.docs
+          .map(doc => ({
+            id: doc.id,
+            ...doc.data()
+          } as GalleryItem))
+          // --- THIS IS THE CRUCIAL FIX ---
+          // It ensures we only try to render items that have a valid imageUrl.
+          .filter(item => item.imageUrl && typeof item.imageUrl === 'string');
+          
         setGalleryItems(itemsData);
       } catch (error) {
         console.error("Error fetching gallery items:", error);
@@ -51,6 +56,7 @@ export default function GalleryPage() {
   }, []);
 
   return (
+    // ... The rest of your JSX code remains exactly the same
     <div className="container py-12 px-4 md:px-6">
       <div className="space-y-4 text-center mb-12">
         <h1 className="text-4xl font-bold font-headline tracking-tighter sm:text-5xl">Gallery</h1>
@@ -88,32 +94,32 @@ export default function GalleryPage() {
                   />
                   <div className="absolute inset-0 bg-black/20 group-hover:bg-black/40 transition-all duration-300 flex items-center justify-center p-4">
                     <div className="text-center">
-                        {item.mediaType === 'video' && <Video className="h-10 w-10 text-white mb-2 mx-auto" />}
-                        <h3 className="font-headline text-lg text-white font-semibold opacity-0 group-hover:opacity-100 transition-opacity duration-300">{item.title}</h3>
+                      {item.mediaType === 'video' && <Video className="h-10 w-10 text-white mb-2 mx-auto" />}
+                      <h3 className="font-headline text-lg text-white font-semibold opacity-0 group-hover:opacity-100 transition-opacity duration-300">{item.title}</h3>
                     </div>
                   </div>
                 </div>
               </DialogTrigger>
               <DialogContent className="max-w-4xl bg-card border-primary/20 p-0">
                   {item.mediaType === 'video' && item.videoUrl ? (
-                     <div className="aspect-video">
-                        <iframe 
-                            width="100%" 
-                            height="100%" 
-                            src={`https://www.youtube.com/embed/${item.videoUrl.split('v=')[1]}`}
-                            title={item.title}
-                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
-                            allowFullScreen
-                            className="rounded-t-lg"
-                        ></iframe>
-                     </div>
+                   <div className="aspect-video">
+                       <iframe 
+                           width="100%" 
+                           height="100%" 
+                           src={`https://www.youtube.com/embed/${item.videoUrl.split('v=')[1]}`}
+                           title={item.title}
+                           allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                           allowFullScreen
+                           className="rounded-t-lg"
+                       ></iframe>
+                   </div>
                   ) : (
                     <Image
-                        src={item.imageUrl}
-                        alt={item.title}
-                        width={1200}
-                        height={800}
-                        className="w-full h-auto max-h-[80vh] object-contain rounded-t-lg"
+                      src={item.imageUrl}
+                      alt={item.title}
+                      width={1200}
+                      height={800}
+                      className="w-full h-auto max-h-[80vh] object-contain rounded-t-lg"
                     />
                   )}
                 <div className="p-6">

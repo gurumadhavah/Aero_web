@@ -31,10 +31,14 @@ export default function AchievementsPage() {
 
     // Use onSnapshot for real-time updates
     const unsubscribe = onSnapshot(q, (querySnapshot) => {
-      let achievementsData = querySnapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data()
-      } as Achievement));
+      let achievementsData = querySnapshot.docs
+        .map(doc => ({
+          id: doc.id,
+          ...doc.data()
+        } as Achievement))
+        // --- THIS IS THE FIX ---
+        // It ensures we only try to render items that have a valid imageUrl.
+        .filter(item => item.imageUrl && typeof item.imageUrl === 'string');
 
       // Client-side sorting to prevent errors from missing fields
       achievementsData.sort((a, b) => {
@@ -73,7 +77,6 @@ export default function AchievementsPage() {
             </Card>
           ))}
         </div>
-      // --- Added friendly message for when there are no achievements ---
       ) : achievements.length === 0 ? (
         <div className="text-center py-16">
             <h2 className="text-2xl font-semibold">No Achievements Yet</h2>
@@ -122,17 +125,17 @@ export default function AchievementsPage() {
                   <DialogTitle className="text-3xl font-headline text-primary">{achievement.title}</DialogTitle>
                   <DialogDescription asChild>
                     <div className="text-base text-foreground/90 space-y-4 pt-4">
-                        <p>{achievement.description}</p>
-                        {achievement.participants && achievement.participants.length > 0 && (
-                          <div>
-                              <h4 className="font-semibold mb-2 flex items-center gap-2"><Users className="h-5 w-5"/> Participants</h4>
-                              <div className="flex flex-wrap gap-2">
-                                  {achievement.participants.map(name => (
-                                      <Badge key={name} variant="secondary">{name}</Badge>
-                                  ))}
-                              </div>
-                          </div>
-                        )}
+                      <p>{achievement.description}</p>
+                      {achievement.participants && achievement.participants.length > 0 && (
+                        <div>
+                            <h4 className="font-semibold mb-2 flex items-center gap-2"><Users className="h-5 w-5"/> Participants</h4>
+                            <div className="flex flex-wrap gap-2">
+                                {achievement.participants.map(name => (
+                                    <Badge key={name} variant="secondary">{name}</Badge>
+                                ))}
+                            </div>
+                        </div>
+                      )}
                     </div>
                   </DialogDescription>
                 </DialogHeader>

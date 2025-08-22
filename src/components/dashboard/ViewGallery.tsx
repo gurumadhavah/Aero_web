@@ -72,7 +72,12 @@ export function ViewGallery() {
       try {
         const q = query(collection(db, "gallery"), orderBy("sortId", "asc"));
         const querySnapshot = await getDocs(q);
-        const data = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as GalleryItem));
+        const data = querySnapshot.docs
+          .map(doc => ({ id: doc.id, ...doc.data() } as GalleryItem))
+          // --- THIS IS THE FIX ---
+          // It ensures we only try to render items that have a valid imageUrl.
+          .filter(item => item.imageUrl && typeof item.imageUrl === 'string');
+          
         setItems(data);
       } catch (error) {
         console.error("Error fetching gallery items:", error);
@@ -255,7 +260,7 @@ export function ViewGallery() {
               {/* You can add more editable fields here */}
             </div>
           </form>
-           <DialogFooter>
+            <DialogFooter>
               <Button type="submit" form="edit-form" disabled={isUpdating}>
                 {isUpdating ? "Saving..." : "Save Changes"}
               </Button>
