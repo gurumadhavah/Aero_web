@@ -21,8 +21,9 @@ export default function Footer() {
               {/* Use logo from environment variable */}
               {logoUrl && <Image src={logoUrl} alt="SJECAero Logo" width={120} height={40} />}
             </Link>
-            <p className="text-sm text-foreground/70 max-w-xs">
-                Designing, building, and flying the future of aerospace technology at SJEC.
+            {/* --- MODIFIED TEXT AND STYLE --- */}
+            <p className="text-sm font-semibold text-yellow-500 max-w-xs italic">
+                &quot;The lower you fall, the higher you fly&quot;
             </p>
              <div className="flex space-x-4 mt-2">
                 <Link href={linkedinUrl || "#"} target="_blank" rel="noopener noreferrer" aria-label="LinkedIn" className="text-foreground/70 hover:text-primary transition-colors">

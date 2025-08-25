@@ -15,11 +15,17 @@ import { useToast } from "@/hooks/use-toast";
 import { Skeleton } from "@/components/ui/skeleton";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { DialogDescription } from "@radix-ui/react-dialog";
 
+// Define the interface for your application data, including the new 'status' field
 interface Submission {
   id: string;
-  name?: string;
   fullName?: string;
+  email?: string;
+  status?: string; // New field to track recruitment stage
   submittedAt?: { seconds: number; nanoseconds: number; };
   [key: string]: any;
 }
@@ -57,24 +63,29 @@ export function ViewSubmissions({
   const [itemToDelete, setItemToDelete] = React.useState<Submission | null>(null);
   const { toast } = useToast();
 
+  // --- NEW STATE for Modals ---
+  const [isInviteModalOpen, setIsInviteModalOpen] = React.useState(false);
+  const [inviteModalType, setInviteModalType] = React.useState<'test' | 'interview' | null>(null);
+  const [applicantToInvite, setApplicantToInvite] = React.useState<Submission | null>(null);
+  const [inviteDate, setInviteDate] = React.useState('');
+  const [inviteVenue, setInviteVenue] = React.useState('');
+
+
   React.useEffect(() => {
     setLoading(true);
     const q: Query = query(collection(db, collectionName), limit(itemLimit));
 
     const unsubscribe = onSnapshot(q, (querySnapshot) => {
       let data = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Submission));
-
       if (orderByField) {
         data.sort((a, b) => {
           const aTimestamp = a[orderByField];
           const bTimestamp = b[orderByField];
           const aHasDate = aTimestamp && typeof aTimestamp.seconds === 'number';
           const bHasDate = bTimestamp && typeof bTimestamp.seconds === 'number';
-
           if (aHasDate && !bHasDate) return -1;
           if (!aHasDate && bHasDate) return 1;
           if (!aHasDate && !bHasDate) return 0;
-          
           return bTimestamp.seconds - aTimestamp.seconds;
         });
       }
@@ -87,20 +98,44 @@ export function ViewSubmissions({
     return () => unsubscribe();
   }, [collectionName, orderByField, itemLimit]);
 
-  const handleProcessApplication = async (applicant: Submission, approved: boolean) => {
+
+  // --- NEW: Function to open the invite modal ---
+  const handleInviteModal = (applicant: Submission, type: 'test' | 'interview') => {
+    setApplicantToInvite(applicant);
+    setInviteModalType(type);
+    setIsInviteModalOpen(true);
+  };
+
+  // --- NEW: Function to send the invitation from the modal ---
+  const handleSendInvite = async () => {
+    if (!applicantToInvite || !inviteDate || !inviteVenue) {
+        toast({ title: "Error", description: "Date and Venue are required.", variant: "destructive" });
+        return;
+    }
+    const action = inviteModalType === 'test' ? 'invite_test' : 'invite_interview';
+    await handleProcessApplication(applicantToInvite, action, inviteDate, inviteVenue);
+    setIsInviteModalOpen(false);
+    setInviteDate('');
+    setInviteVenue('');
+  };
+
+  // --- MODIFIED: Merged and expanded the processing logic ---
+  const handleProcessApplication = async (applicant: Submission, action: string, date?: string, venue?: string) => {
     setActionLoading(applicant.id);
     try {
       const processRecruitment = httpsCallable(functions, 'processRecruitment');
       await processRecruitment({
+        action,
+        applicantId: applicant.id,
         applicantEmail: applicant.email,
         applicantName: applicant.fullName,
-        approved: approved,
-        docId: applicant.id,
+        date,
+        venue,
       });
 
       toast({
-        title: `Applicant ${approved ? 'Approved' : 'Rejected'}`,
-        description: `${applicant.fullName}'s application has been processed.`,
+        title: `Action Success`,
+        description: `Application for ${applicant.fullName} has been processed.`,
       });
     } catch (error) {
       console.error("Error processing application:", error);
@@ -109,7 +144,7 @@ export function ViewSubmissions({
       setActionLoading(null);
     }
   };
-  
+
   const handleDeleteClick = (submission: Submission) => {
     setItemToDelete(submission);
     setIsAlertOpen(true);
@@ -133,9 +168,7 @@ export function ViewSubmissions({
     const value = submission[header];
     if (!value) return '-';
 
-    // THE FIX: Added a check for the header name 'timestamp'
     const isDateField = header.toLowerCase().includes('at') || header.toLowerCase() === 'timestamp';
-
     if (isDateField && value && typeof value.seconds === 'number') {
       return format(new Date(value.seconds * 1000), 'PPP');
     }
@@ -177,19 +210,21 @@ export function ViewSubmissions({
                             <Button variant="ghost" className="h-8 w-8 p-0"><span className="sr-only">Open menu</span><MoreHorizontal className="h-4 w-4" /></Button>
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end">
-                            {showActions && (
+                            {/* --- NEW: Recruitment Process Options --- */}
+                            {collectionName === 'recruitment' && (
                               <>
-                                <DropdownMenuItem onClick={() => handleProcessApplication(submission, true)}>Approve</DropdownMenuItem>
-                                <DropdownMenuItem onClick={() => handleProcessApplication(submission, false)}>Reject</DropdownMenuItem>
+                                <DropdownMenuItem onClick={() => handleInviteModal(submission, 'test')}>Invite for Test</DropdownMenuItem>
+                                <DropdownMenuItem onClick={() => handleInviteModal(submission, 'interview')}>Invite for Interview</DropdownMenuItem>
+                                <DropdownMenuItem onClick={() => handleProcessApplication(submission, 'accept')}>Confirm Membership</DropdownMenuItem>
+                                <DropdownMenuSeparator />
+                                <DropdownMenuItem className="text-red-600 focus:text-red-500" onClick={() => handleProcessApplication(submission, 'reject')}>Reject</DropdownMenuItem>
+                                <DropdownMenuSeparator />
                               </>
                             )}
                             {showDeleteAction && (
-                              <>
-                                {showActions && <DropdownMenuSeparator />}
-                                <DropdownMenuItem className="text-red-600 focus:text-red-500" onClick={() => handleDeleteClick(submission)}>
-                                  <Trash2 className="mr-2 h-4 w-4" /> Delete
-                                </DropdownMenuItem>
-                              </>
+                              <DropdownMenuItem className="text-red-600 focus:text-red-500" onClick={() => handleDeleteClick(submission)}>
+                                <Trash2 className="mr-2 h-4 w-4" /> Delete
+                              </DropdownMenuItem>
                             )}
                           </DropdownMenuContent>
                         </DropdownMenu>
@@ -217,6 +252,32 @@ export function ViewSubmissions({
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* --- NEW: Modal for sending test/interview invites --- */}
+      <Dialog open={isInviteModalOpen} onOpenChange={setIsInviteModalOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Invite for {inviteModalType === 'test' ? 'Test' : 'Interview'}</DialogTitle>
+            <DialogDescription>
+              Enter the date and venue for the applicant's {inviteModalType}.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="invite-date" className="text-right">Date</Label>
+              <Input id="invite-date" type="date" value={inviteDate} onChange={(e) => setInviteDate(e.target.value)} className="col-span-3" />
+            </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="invite-venue" className="text-right">Venue</Label>
+              <Input id="invite-venue" type="text" value={inviteVenue} onChange={(e) => setInviteVenue(e.target.value)} className="col-span-3" placeholder="e.g., Aero Lab, B-Block" />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="secondary" onClick={() => setIsInviteModalOpen(false)}>Cancel</Button>
+            <Button onClick={handleSendInvite}>Send Invitation</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </>
   );
 }

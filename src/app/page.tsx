@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowRight, BrainCircuit, Hammer, Award } from "lucide-react";
+import { BrainCircuit, Hammer, Award } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { db } from "@/lib/firebase";
 import { collection, getDocs, query, where, orderBy } from "firebase/firestore";
@@ -23,7 +23,9 @@ interface FixedTestimonial {
 // --- Centralized Environment Variables ---
 const envConfig = {
     backgroundImageUrl: process.env.NEXT_PUBLIC_BACKGROUND_IMAGE_URL,
-    logoUrl: process.env.NEXT_PUBLIC_REAL_LOGO_URL,
+    // Using the dynamic image you provided for this section
+
+    aboutUsImageUrl: process.env.NEXT_PUBLIC_REAL_LOGO_URL,
 };
 
 export default function Home() {
@@ -45,8 +47,6 @@ export default function Home() {
             id: doc.id,
             ...doc.data()
           } as FixedTestimonial))
-          // --- THIS IS THE FIX ---
-          // It ensures we only try to render testimonials that have a valid avatarUrl.
           .filter(item => item.avatarUrl && typeof item.avatarUrl === 'string');
 
         setFixedTestimonials(data);
@@ -59,11 +59,11 @@ export default function Home() {
     fetchFixedTestimonials();
   }, []);
 
-  const whyJoin = [
+  const corePillars = [
     {
       icon: <BrainCircuit className="h-10 w-10 text-primary" />,
       title: "Innovation",
-      description: "Push the boundaries of aerial technology with cutting-edge research and development."
+      description: "Pushing the boundaries of aerial technology with cutting-edge research and development."
     },
     {
       icon: <Hammer className="h-10 w-10 text-primary" />,
@@ -73,7 +73,7 @@ export default function Home() {
     {
       icon: <Award className="h-10 w-10 text-primary" />,
       title: "Competitions",
-      description: "Represent SJEC and showcase your skills at prestigious national-level aeromodelling competitions."
+      description: "Representing SJEC and showcasing skills at prestigious national-level aeromodelling competitions."
     }
   ];
 
@@ -99,58 +99,55 @@ export default function Home() {
           </p>
           <div className="flex flex-col gap-4 min-[400px]:flex-row justify-center">
             <Button asChild size="lg" className="bg-primary hover:bg-primary/90 text-primary-foreground">
-              <Link href="/projects">
-                Explore Our Fleet
-              </Link>
-            </Button>
-            <Button asChild size="lg" variant="outline" className="border-primary text-primary hover:bg-primary/10 hover:text-primary">
-              <Link href="/recruitment">
-                Join The Club
-              </Link>
+              <Link href="/projects">Explore Our Fleet</Link>
             </Button>
           </div>
         </div>
       </section>
 
+      {/* === THIS IS THE UPDATED "ABOUT" SECTION === */}
       <section id="about" className="w-full py-12 md:py-20 bg-background animate-fade-in-up">
         <div className="container px-4 md:px-6">
           <div className="grid md:grid-cols-2 gap-12 items-center">
             <div className="animate-fade-in-up" style={{ animationDelay: '0.2s' }}>
-              <h2 className="text-3xl font-bold font-headline tracking-tighter sm:text-4xl text-primary">About SJEC Aero</h2>
-              <p className="mt-4 text-foreground/80 text-lg">
-                SJEC AERO is an aeromodelling club of St. Joseph Engineering College, established with an aim to create innovation in the field of aviation with regard to Unmanned Aerial Vehicles (RC planes and drones). The tagline of the club is &quot;The lower you fall, the higher you fly&quot;, which is an epitome of how the club has taken shape over time.
+              <h2 className="text-3xl font-bold font-headline tracking-tighter sm:text-4xl text-primary">Where Imagination Takes Flight</h2>
+              <p className="mt-4 text-foreground/80 text-lg leading-relaxed">
+                We are more than a club; we are a launchpad. Here at SJEC Aero, engineering transcends the classroom, transforming into a tangible symphony of aerodynamics, electronics, and sheer passion. We are a vibrant community of innovators, builders, and dreamers who believe that the sky is not the limit, but the beginning. 
               </p>
               <p className="mt-4 text-foreground/80">
-                We take part in various Aeromodelling competitions across India. Apart from competitions, we conduct research in this field and develop products beneficial to the society. We also conduct workshops to those interested in aeromodelling.
+                In our workspace, raw concepts and lines of code are meticulously crafted into powerful, custom-built aircraft, each one a testament to our relentless pursuit of flight.
               </p>
             </div>
-            <div className="animate-fade-in-up" style={{ animationDelay: '0.4s' }}>
-              {envConfig.logoUrl && (
+            <div className="animate-fade-in-up flex flex-col items-center" style={{ animationDelay: '0.4s' }}>
+              {envConfig.aboutUsImageUrl && (
                 <Image
-                    src={envConfig.logoUrl}
-                    width="600"
-                    height="400"
-                    alt="About Us Image"
-                    className="rounded-xl shadow-2xl"
+                    src={envConfig.aboutUsImageUrl}
+                    width={600}
+                    height={400}
+                    alt="A custom-built RC aircraft soaring through the sky"
+                    className="rounded-xl shadow-2xl object-cover"
                 />
               )}
+              <p className="mt-6 text-center font-headline text-2xl italic text-primary">
+                &quot;The lower you fall, the higher you fly&quot;
+              </p>
             </div>
           </div>
         </div>
       </section>
 
-      <section id="why-join" className="w-full py-12 md:py-20 bg-secondary/50 ">
+      <section id="experience" className="w-full py-12 md:py-20 bg-secondary/50 ">
         <div className="container px-4 md:px-6">
           <div className="flex flex-col items-center justify-center space-y-4 text-center animate-fade-in-up">
             <div className="space-y-2">
-              <h2 className="text-3xl font-bold font-headline tracking-tighter sm:text-4xl text-primary">Why Join Us?</h2>
+              <h2 className="text-3xl font-bold font-headline tracking-tighter sm:text-4xl text-primary">The Aero Experience</h2>
               <p className="max-w-[900px] text-foreground/80 md:text-xl/relaxed">
-                Become part of a team that's passionate about shaping the future of aviation.
+                From blueprint to blue skies, here's what our members are passionate about.
               </p>
             </div>
           </div>
           <div className="mx-auto grid max-w-5xl gap-8 sm:grid-cols-2 lg:grid-cols-3 mt-12 animate-fade-in-up">
-            {whyJoin.map((item, index) => (
+            {corePillars.map((item, index) => (
               <Card key={item.title} className="text-center p-6 bg-card border-primary/20 transform transition-all duration-300 hover:scale-105 hover:shadow-xl hover:border-primary animate-fade-in-up" style={{ animationDelay: `${(index + 1) * 0.2}s` }}>
                 <div className="flex justify-center mb-4">{item.icon}</div>
                 <h3 className="text-xl font-bold font-headline">{item.title}</h3>
@@ -198,19 +195,12 @@ export default function Home() {
           <div className="space-y-3">
             <h2 className="text-3xl font-bold font-headline tracking-tighter md:text-4xl text-primary">Ready to Take Flight?</h2>
             <p className="mx-auto max-w-[600px] text-foreground/80 md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed">
-              Join our club to start your journey in aerospace, or reach out if you have questions. We'd love to hear from you.
+              Reach out if you have questions. We'd love to hear from you.
             </p>
           </div>
           <div className="flex flex-col gap-4 min-[400px]:flex-row justify-center">
-              <Button asChild size="lg" className="bg-primary hover:bg-primary/90 text-primary-foreground">
-              <Link href="/recruitment">
-                Apply Now
-              </Link>
-            </Button>
             <Button asChild size="lg" variant="outline" className="border-primary text-primary hover:bg-primary/10 hover:text-primary">
-              <Link href="/contact">
-                Contact Us
-              </Link>
+              <Link href="/contact">Contact Us</Link>
             </Button>
           </div>
         </div>

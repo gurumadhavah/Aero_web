@@ -122,7 +122,7 @@ export default function RecruitmentPage() {
     <div className="container py-12 px-4 md:px-6">
       <Card className="mx-auto max-w-2xl bg-card border-primary/20">
         <CardHeader className="text-center">
-          <CardTitle className="text-3xl font-headline text-primary">Join SJECAero</CardTitle>
+          <CardTitle className="text-3xl font-headline text-primary">Join SJEC Aero</CardTitle>
           <CardDescription>
             Ready to build the future of flight? Fill out the form below to apply.
           </CardDescription>
@@ -189,7 +189,7 @@ export default function RecruitmentPage() {
                 name="reason"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Why do you want to join SJECAero?</FormLabel>
+                    <FormLabel>Why do you want to join SJEC Aero?</FormLabel>
                     <FormControl>
                       <Textarea placeholder="Tell us about your passion for aerospace, relevant skills, or what you hope to learn." {...field} />
                     </FormControl>
