@@ -12,7 +12,7 @@ const spaceGrotesk = Space_Grotesk({ subsets: ['latin'], variable: '--font-space
 
 export const metadata: Metadata = {
   title: 'SJEC Aero - SJEC AERO Club',
-  description: 'The official website for the SJEC AERO Club. Explore our projects, achievements, and events.',
+  description: 'Explore the projects, achievements, and team of SJEC Aero, the official student club of St. Joseph Engineering College (SJEC).',
 };
 
 export default function RootLayout({

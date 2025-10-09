@@ -101,8 +101,7 @@ export default function Header() {
                   <Link href="/" onClick={() => setIsMobileMenuOpen(false)} className="flex items-center space-x-2">
                     {logoUrl && <Image src={logoUrl} alt="SJECAero Logo" width={120} height={40} />}
                   </Link>
-                  {/* College Logo (in mobile menu) - Size Increased */}
-                  {collegeLogoUrl && <Image src={collegeLogoUrl} alt="College Logo" width={56} height={56} className="rounded-full" />}
+                  {collegeLogoUrl && <Image src={collegeLogoUrl} alt="College Logo" width={70} height={70} className="rounded-full" />}
                 </div>
                 <nav className="flex flex-col gap-4 p-4">
                   {navItems.map((item) => (

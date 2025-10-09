@@ -92,8 +92,11 @@ export default function Home() {
         )}
         <div className="relative z-10 container px-4 md:px-6 animate-fade-in-up">
           <h1 className="font-headline text-5xl font-bold tracking-tighter sm:text-6xl xl:text-7xl/none text-primary">
-            SJEC Aero
+            SJEC AERO
           </h1>
+           <h2 className="text-xl font-semibold text-primary/80 mt-2">
+            ST. JOSEPH ENGINEERING COLLEGE MANGALURU
+          </h2>
           <p className="max-w-[700px] mx-auto text-foreground/80 md:text-xl my-6">
             Designing, building, and flying the future of aerospace technology.
           </p>
@@ -104,16 +107,34 @@ export default function Home() {
           </div>
         </div>
       </section>
+        <div className="w-full flex justify-center py-2 animate-fade-in-up">
+        <div className="flex items-center w-full max-w-5xl mx-4 px-4 py-2  rounded shadow">
+          
+          <div className="flex-1 overflow-hidden">
+            <div className="whitespace-nowrap animate-marquee text-yellow-900 font-medium px-4">
+              New: Runner ups in Aerodominator at SAE VIT &nbsp; | &nbsp; Our team got Air India Rank 1 at the SAEISS Drone Development Challenge! 
+            </div>
+          </div>
+        </div>
+        <style jsx>{`
+          .animate-marquee {
+            display: inline-block;
+            animation: marquee 30s linear infinite;
+          }
+          @keyframes marquee {
+            0% { transform: translateX(100%); }
+            100% { transform: translateX(-100%); }
+          }
+        `}</style>
+      </div>
 
-      {/* === THIS IS THE UPDATED "ABOUT" SECTION === */}
       <section id="about" className="w-full py-12 md:py-20 bg-background animate-fade-in-up">
         <div className="container px-4 md:px-6">
           <div className="grid md:grid-cols-2 gap-12 items-center">
             <div className="animate-fade-in-up" style={{ animationDelay: '0.2s' }}>
               <h2 className="text-3xl font-bold font-headline tracking-tighter sm:text-4xl text-primary">Where Imagination Takes Flight</h2>
               <p className="mt-4 text-foreground/80 text-lg leading-relaxed">
-                We are more than a club; we are a launchpad. Here at SJEC Aero, engineering transcends the classroom, transforming into a tangible symphony of aerodynamics, electronics, and sheer passion. We are a vibrant community of innovators, builders, and dreamers who believe that the sky is not the limit, but the beginning. 
-              </p>
+                SJEC Aero is where engineering takes flight. We are a hands-on community dedicated to mastering the complexities of unmanned aerial vehicles. From the initial design sketch to the final test flight, our members are involved in every stage of creation. Our work regularly puts us on the national stage, where we compete against the best and showcase our innovative aircraft. Beyond competitions, we are committed to conducting vital research that pushes the boundaries of what's possible in aerospace. We provide a platform for students to turn ambitious ideas into award-winning aircraft, fostering a culture of excellence, perseverance, and teamwork.              </p>
               <p className="mt-4 text-foreground/80">
                 In our workspace, raw concepts and lines of code are meticulously crafted into powerful, custom-built aircraft, each one a testament to our relentless pursuit of flight.
               </p>
@@ -191,7 +212,7 @@ export default function Home() {
       </section>
 
       <section id="contact" className="w-full py-12 md:py-20 bg-secondary/50">
-       <div className="container grid items-center justify-center gap-4 px-4 text-center md:px-6 animate-fade-in-up">
+      <div className="container grid items-center justify-center gap-4 px-4 text-center md:px-6 animate-fade-in-up">
           <div className="space-y-3">
             <h2 className="text-3xl font-bold font-headline tracking-tighter md:text-4xl text-primary">Ready to Take Flight?</h2>
             <p className="mx-auto max-w-[600px] text-foreground/80 md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed">

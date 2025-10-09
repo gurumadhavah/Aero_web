@@ -132,9 +132,8 @@ export default function TeamPage() {
         </div>
       </section>
 
-      {/* Alumni Section */}
       <section>
-        <h2 className="text-3xl font-bold font-headline tracking-tighter text-center mb-8">Our Alumni</h2>
+        <h2 className="text-3xl font-bold font-headline tracking-tighter text-center mb-8">Our Seniors</h2>
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
            {loading ? (
                 Array.from({ length: 5 }).map((_, index) => (
