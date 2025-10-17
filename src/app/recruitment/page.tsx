@@ -4,206 +4,197 @@ import * as React from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
+import emailjs from "emailjs-com";
 import { db } from "@/lib/firebase";
-import { collection, addDoc, doc, getDoc, serverTimestamp } from "firebase/firestore";
+import { collection, addDoc, serverTimestamp, getDocs, query, where, doc, onSnapshot } from "firebase/firestore";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
+import { getApplicationReceivedBody } from "@/lib/emailTemplates";
+import { Skeleton } from "@/components/ui/skeleton"; // Import Skeleton for loading state
 
 const formSchema = z.object({
-  fullName: z.string().min(1, { message: "Full name is required." }),
-  email: z.string().email({
-    message: "Please enter a valid email address.",
-  }).refine(email => email.endsWith("@sjec.ac.in") || email.endsWith("@gmail.com"), {
-    message: "Email must be a valid @sjec.ac.in or @gmail.com address.",
-  }),
-  yearOfStudy: z.string().min(1, { message: "Year of study is required." }),
-  branch: z.string().min(1, { message: "Branch is required." }),
-  reason: z.string().min(20, { message: "Please elaborate a bit more (min 20 characters)." }),
+  fullName: z.string().min(1, "Full name is required."),
+  email: z.string().email("Please enter a valid email address."),
+  usn: z.string().min(10, "USN must be at least 10 characters.").max(10),
+  yearOfStudy: z.string().min(1, "Year of study is required."),
+  branch: z.string().min(1, "Branch is required."),
+  reason: z.string().min(20, "Please provide a reason of at least 20 characters."),
 });
 
 export default function RecruitmentPage() {
   const { toast } = useToast();
-  const [isSubmitting, setIsSubmitting] = React.useState(false);
-  const [isRecruitmentActive, setIsRecruitmentActive] = React.useState(false);
-  const [isLoading, setIsLoading] = React.useState(true);
+  
+  // --- NEW: State for recruitment status and loading ---
+  const [isRecruitmentOpen, setIsRecruitmentOpen] = React.useState(false);
+  const [loading, setLoading] = React.useState(true);
 
+  // EmailJS Credentials
+  const serviceId = process.env.NEXT_PUBLIC_EMAILJS_SERVICE_ID!;
+  const genericTemplateId = process.env.NEXT_PUBLIC_EMAILJS_TEMPLATE_GENERIC!;
+  const publicKey = process.env.NEXT_PUBLIC_EMAILJS_PUBLIC_KEY!;
+  
+  // --- NEW: useEffect to fetch recruitment status ---
+  React.useEffect(() => {
+    const settingsDocRef = doc(db, "settings", "recruitment");
+    const unsubscribe = onSnapshot(settingsDocRef, (doc) => {
+      if (doc.exists() && doc.data().active === true) {
+        setIsRecruitmentOpen(true);
+      } else {
+        setIsRecruitmentOpen(false);
+      }
+      setLoading(false);
+    });
+
+    // Cleanup listener on component unmount
+    return () => unsubscribe();
+  }, []);
+  
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
-    defaultValues: {
-      fullName: "",
-      email: "",
-      yearOfStudy: "",
-      branch: "",
-      reason: "",
-    },
+    defaultValues: { fullName: "", email: "", usn: "", yearOfStudy: "", branch: "", reason: "" },
   });
 
-  React.useEffect(() => {
-    const fetchRecruitmentStatus = async () => {
-      try {
-        const docRef = doc(db, "settings", "recruitment");
-        const docSnap = await getDoc(docRef);
-        if (docSnap.exists() && docSnap.data().active === true) {
-          setIsRecruitmentActive(true);
-        } else {
-          setIsRecruitmentActive(false);
-        }
-      } catch (error) {
-        console.error("Error fetching recruitment status:", error);
-        setIsRecruitmentActive(false);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-    fetchRecruitmentStatus();
-  }, []);
-
   async function onSubmit(values: z.infer<typeof formSchema>) {
-    setIsSubmitting(true);
+    // Double-check if recruitment is still open before submitting
+    if (!isRecruitmentOpen) {
+        toast({ title: "Recruitment Closed", description: "Sorry, we are no longer accepting applications at this time.", variant: "destructive" });
+        return;
+    }
+      
     try {
-        await addDoc(collection(db, "recruitment"), {
-            ...values,
-            submittedAt: serverTimestamp(),
-        });
-        toast({
-          title: "Application Submitted!",
-          description: "Thank you for your interest. We will get back to you soon.",
-        });
-        form.reset();
-    } catch (error) {
-        console.error("Error adding document: ", error);
-        toast({
-          title: "Submission Failed",
-          description: "Could not submit your application. Please try again.",
-          variant: "destructive",
-        });
-    } finally {
-        setIsSubmitting(false);
+      const q = query(collection(db, "recruitment"), where("email", "==", values.email));
+      const querySnapshot = await getDocs(q);
+      if (!querySnapshot.empty) {
+        toast({ title: "Already Submitted", description: "You have already submitted an application with this email address.", variant: "destructive" });
+        return;
+      }
+
+      await addDoc(collection(db, "recruitment"), { ...values, submittedAt: serverTimestamp(), status: 'submitted' });
+
+      const templateParams = {
+        subject: "We've Received Your Application | SJEC Aero",
+        html_body: getApplicationReceivedBody(values.fullName),
+        to_email: values.email,
+      };
+
+      await emailjs.send(serviceId, genericTemplateId, templateParams, publicKey);
+
+      toast({
+        title: "Application Submitted!",
+        description: "Thank you for your interest. We've sent a confirmation to your email.",
+      });
+      form.reset();
+    } catch (error: any) {
+      console.error("Error submitting application: ", error);
+      toast({
+        title: "Submission Error",
+        description: `Could not submit your application. ${error.text || ""}`,
+        variant: "destructive",
+      });
     }
   }
 
-  if (isLoading) {
-    return <div className="container py-12 text-center">Loading...</div>;
-  }
-
-  if (!isRecruitmentActive) {
+  // --- NEW: Loading State UI ---
+  if (loading) {
     return (
       <div className="container py-12 px-4 md:px-6">
-        <Card className="mx-auto max-w-2xl bg-card border-primary/20">
-          <CardHeader className="text-center">
-            <CardTitle className="text-2xl font-headline text-primary">Recruitment Closed</CardTitle>
-            <CardDescription>
-              Our recruitment drive is currently closed. Please check back later or follow our social media for announcements.
-            </CardDescription>
+        <Card className="max-w-3xl mx-auto">
+          <CardHeader>
+            <Skeleton className="h-8 w-48" />
+            <Skeleton className="h-4 w-full mt-2" />
           </CardHeader>
+          <CardContent className="space-y-6">
+            <Skeleton className="h-10 w-full" />
+            <Skeleton className="h-10 w-full" />
+            <Skeleton className="h-24 w-full" />
+            <Skeleton className="h-12 w-full" />
+          </CardContent>
         </Card>
       </div>
     );
   }
 
+  // --- NEW: Conditional Rendering Logic ---
   return (
     <div className="container py-12 px-4 md:px-6">
-      <Card className="mx-auto max-w-2xl bg-card border-primary/20">
-        <CardHeader className="text-center">
-          <CardTitle className="text-3xl font-headline text-primary">Join SJEC Aero</CardTitle>
-          <CardDescription>
-            Ready to build the future of flight? Fill out the form below to apply.
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="grid gap-4">
-              <FormField
-                control={form.control}
-                name="fullName"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Full Name</FormLabel>
-                    <FormControl>
-                      <Input placeholder="Your Full Name" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="email"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Email</FormLabel>
-                    <FormControl>
-                      <Input type="email" placeholder="your.email@example.com" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <FormField
-                  control={form.control}
-                  name="yearOfStudy"
-                  render={({ field }) => (
+      {isRecruitmentOpen ? (
+        // SHOW THE FORM IF RECRUITMENT IS OPEN
+        <Card className="max-w-3xl mx-auto">
+          <CardHeader>
+            <CardTitle>Join Our Team</CardTitle>
+            <CardDescription>
+              Passionate about aviation and engineering? Fill out the form below to apply.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Form {...form}>
+              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                  <FormField control={form.control} name="fullName" render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Full Name</FormLabel>
+                      <FormControl><Input placeholder="John Doe" {...field} /></FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )} />
+                  <FormField control={form.control} name="email" render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Email Address</FormLabel>
+                      <FormControl><Input type="email" placeholder="name@example.com" {...field} /></FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )} />
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+                  <FormField control={form.control} name="usn" render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>USN</FormLabel>
+                      <FormControl><Input placeholder="4SO21CS001" {...field} /></FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )} />
+                  <FormField control={form.control} name="yearOfStudy" render={({ field }) => (
                     <FormItem>
                       <FormLabel>Year of Study</FormLabel>
-                      <FormControl>
-                        <Input placeholder="e.g., 2nd Year" {...field} />
-                      </FormControl>
+                      <FormControl><Input placeholder="e.g., 2nd Year" {...field} /></FormControl>
                       <FormMessage />
                     </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="branch"
-                  render={({ field }) => (
+                  )} />
+                  <FormField control={form.control} name="branch" render={({ field }) => (
                     <FormItem>
                       <FormLabel>Branch</FormLabel>
-                      <FormControl>
-                        <Input placeholder="e.g., Computer Science And Engineering" {...field} />
-                      </FormControl>
+                      <FormControl><Input placeholder="e.g., CSE" {...field} /></FormControl>
                       <FormMessage />
                     </FormItem>
-                  )}
-                />
-              </div>
-              <FormField
-                control={form.control}
-                name="reason"
-                render={({ field }) => (
+                  )} />
+                </div>
+                <FormField control={form.control} name="reason" render={({ field }) => (
                   <FormItem>
                     <FormLabel>Why do you want to join SJEC Aero?</FormLabel>
-                    <FormControl>
-                      <Textarea placeholder="Tell us about your passion for aerospace, relevant skills, or what you hope to learn." {...field} />
-                    </FormControl>
+                    <FormControl><Textarea placeholder="Tell us about your passion for aerospace, relevant skills, or what you hope to learn..." className="min-h-[120px]" {...field} /></FormControl>
                     <FormMessage />
                   </FormItem>
-                )}
-              />
-              <Button type="submit" disabled={isSubmitting} className="w-full mt-2 bg-primary hover:bg-primary/90 text-primary-foreground" size="lg">
-                {isSubmitting ? "Submitting..." : "Submit Application"}
-              </Button>
-            </form>
-          </Form>
-        </CardContent>
-      </Card>
+                )} />
+                <Button type="submit" className="w-full" size="lg">Submit Application</Button>
+              </form>
+            </Form>
+          </CardContent>
+        </Card>
+      ) : (
+        // SHOW THIS MESSAGE IF RECRUITMENT IS CLOSED
+        <Card className="max-w-3xl mx-auto text-center">
+            <CardHeader>
+                <CardTitle>Recruitment is Currently Closed</CardTitle>
+                <CardDescription>
+                    We are not accepting new applications at this time. Please check back later or follow our social media for announcements about our next recruitment drive.
+                </CardDescription>
+            </CardHeader>
+        </Card>
+      )}
     </div>
   );
 }

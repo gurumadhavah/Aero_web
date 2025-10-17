@@ -1,11 +1,12 @@
 "use client";
 
 import * as React from "react";
-import { db, functions } from "@/lib/firebase";
-import { httpsCallable } from "firebase/functions";
-import { collection, query, limit, onSnapshot, Query, doc, deleteDoc } from "firebase/firestore";
+import { db } from "@/lib/firebase";
+import { collection, query, limit, onSnapshot, Query, doc, deleteDoc, updateDoc, serverTimestamp } from "firebase/firestore";
 import { format } from 'date-fns';
 import { MoreHorizontal, Trash2 } from "lucide-react";
+import emailjs from "emailjs-com";
+import { getRecruitmentEmailBody, getRecruitmentEmailSubject } from "@/lib/emailTemplates";
 
 // Shadcn/ui components
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -15,17 +16,16 @@ import { useToast } from "@/hooks/use-toast";
 import { Skeleton } from "@/components/ui/skeleton";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
-import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { DialogDescription } from "@radix-ui/react-dialog";
 
-// Define the interface for your application data, including the new 'status' field
+// Interfaces
 interface Submission {
   id: string;
   fullName?: string;
   email?: string;
-  status?: string; // New field to track recruitment stage
+  status?: string;
   submittedAt?: { seconds: number; nanoseconds: number; };
   [key: string]: any;
 }
@@ -46,15 +46,15 @@ const formatHeader = (header: string) => {
   return result.charAt(0).toUpperCase() + result.slice(1);
 };
 
-export function ViewSubmissions({ 
-    collectionName, 
-    title, 
-    description, 
-    headers, 
-    showActions = false, 
-    showDeleteAction = false,
-    orderByField,
-    itemLimit = 20
+export function ViewSubmissions({
+  collectionName,
+  title,
+  description,
+  headers,
+  showActions = false,
+  showDeleteAction = false,
+  orderByField,
+  itemLimit = 20,
 }: ViewSubmissionsProps) {
   const [submissions, setSubmissions] = React.useState<Submission[]>([]);
   const [loading, setLoading] = React.useState(true);
@@ -63,83 +63,87 @@ export function ViewSubmissions({
   const [itemToDelete, setItemToDelete] = React.useState<Submission | null>(null);
   const { toast } = useToast();
 
-  // --- NEW STATE for Modals ---
   const [isInviteModalOpen, setIsInviteModalOpen] = React.useState(false);
   const [inviteModalType, setInviteModalType] = React.useState<'test' | 'interview' | null>(null);
   const [applicantToInvite, setApplicantToInvite] = React.useState<Submission | null>(null);
   const [inviteDate, setInviteDate] = React.useState('');
   const [inviteVenue, setInviteVenue] = React.useState('');
 
+  const serviceId = process.env.NEXT_PUBLIC_EMAILJS_SERVICE_ID!;
+  const genericTemplateId = process.env.NEXT_PUBLIC_EMAILJS_TEMPLATE_GENERIC!;
+  const publicKey = process.env.NEXT_PUBLIC_EMAILJS_PUBLIC_KEY!;
 
   React.useEffect(() => {
     setLoading(true);
     const q: Query = query(collection(db, collectionName), limit(itemLimit));
-
     const unsubscribe = onSnapshot(q, (querySnapshot) => {
       let data = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Submission));
       if (orderByField) {
         data.sort((a, b) => {
           const aTimestamp = a[orderByField];
           const bTimestamp = b[orderByField];
-          const aHasDate = aTimestamp && typeof aTimestamp.seconds === 'number';
-          const bHasDate = bTimestamp && typeof bTimestamp.seconds === 'number';
-          if (aHasDate && !bHasDate) return -1;
-          if (!aHasDate && bHasDate) return 1;
-          if (!aHasDate && !bHasDate) return 0;
-          return bTimestamp.seconds - aTimestamp.seconds;
+          if (aTimestamp && bTimestamp) return bTimestamp.seconds - aTimestamp.seconds;
+          return 0;
         });
       }
       setSubmissions(data);
-      setLoading(false);
-    }, (error) => {
-      console.error(`Error fetching ${collectionName}:`, error);
       setLoading(false);
     });
     return () => unsubscribe();
   }, [collectionName, orderByField, itemLimit]);
 
-
-  // --- NEW: Function to open the invite modal ---
   const handleInviteModal = (applicant: Submission, type: 'test' | 'interview') => {
     setApplicantToInvite(applicant);
     setInviteModalType(type);
     setIsInviteModalOpen(true);
-  };
-
-  // --- NEW: Function to send the invitation from the modal ---
-  const handleSendInvite = async () => {
-    if (!applicantToInvite || !inviteDate || !inviteVenue) {
-        toast({ title: "Error", description: "Date and Venue are required.", variant: "destructive" });
-        return;
-    }
-    const action = inviteModalType === 'test' ? 'invite_test' : 'invite_interview';
-    await handleProcessApplication(applicantToInvite, action, inviteDate, inviteVenue);
-    setIsInviteModalOpen(false);
     setInviteDate('');
     setInviteVenue('');
   };
 
-  // --- MODIFIED: Merged and expanded the processing logic ---
-  const handleProcessApplication = async (applicant: Submission, action: string, date?: string, venue?: string) => {
+  const handleSendInvite = async () => {
+    if (!applicantToInvite || !inviteDate || !inviteVenue) {
+      toast({ title: "Error", description: "Date and Venue are required.", variant: "destructive" });
+      return;
+    }
+    const action = inviteModalType === 'test' ? 'invite_test' : 'interview';
+    await handleProcessApplication(applicantToInvite, action, { date: inviteDate, venue: inviteVenue });
+    setIsInviteModalOpen(false);
+  };
+
+  const handleProcessApplication = async (applicant: Submission, action: string, details?: { date: string, venue: string }) => {
+    if (!applicant?.email || !applicant?.fullName) {
+        toast({ title: "Error", description: "Applicant data is missing.", variant: "destructive" });
+        return;
+    }
     setActionLoading(applicant.id);
     try {
-      const processRecruitment = httpsCallable(functions, 'processRecruitment');
-      await processRecruitment({
-        action,
-        applicantId: applicant.id,
-        applicantEmail: applicant.email,
-        applicantName: applicant.fullName,
-        date,
-        venue,
-      });
+      const docRef = doc(db, collectionName, applicant.id);
+      let newStatus = action.replace('invite_', '');
+      if (action.includes('invite')) newStatus += '_invited';
+      await updateDoc(docRef, { status: newStatus, lastUpdated: serverTimestamp() });
 
-      toast({
-        title: `Action Success`,
-        description: `Application for ${applicant.fullName} has been processed.`,
-      });
-    } catch (error) {
+      // --- FIX & IMPROVEMENT IS HERE ---
+      // Create a new details object for the email to format the date nicely.
+      let emailDetails = details;
+      if (details && details.date) {
+        // The input type="date" gives "YYYY-MM-DD". We add 'T00:00:00' to avoid timezone issues
+        // and then format it into a readable string like "October 17, 2025".
+        const formattedDate = format(new Date(details.date + 'T00:00:00'), 'MMMM d, yyyy');
+        emailDetails = { ...details, date: formattedDate };
+      }
+
+      const templateParams = {
+        subject: getRecruitmentEmailSubject(action),
+        html_body: getRecruitmentEmailBody(action, applicant.fullName, emailDetails),
+        to_email: applicant.email,
+      };
+
+      await emailjs.send(serviceId, genericTemplateId, templateParams, publicKey);
+      
+      toast({ title: "Action Success", description: `Application for ${applicant.fullName} processed.` });
+    } catch (error: any) {
       console.error("Error processing application:", error);
-      toast({ title: "Action Failed", description: "An error occurred. Please check the console.", variant: "destructive" });
+      toast({ title: "Action Failed", description: `An error occurred: ${error.text || "Check console."}`, variant: "destructive" });
     } finally {
       setActionLoading(null);
     }
@@ -156,7 +160,6 @@ export function ViewSubmissions({
       await deleteDoc(doc(db, collectionName, itemToDelete.id));
       toast({ title: "Success", description: "Submission has been deleted." });
     } catch (error) {
-      console.error("Error deleting submission:", error);
       toast({ title: "Error", description: "Failed to delete submission.", variant: "destructive" });
     } finally {
       setIsAlertOpen(false);
@@ -167,13 +170,11 @@ export function ViewSubmissions({
   const formatCell = (submission: Submission, header: string) => {
     const value = submission[header];
     if (!value) return '-';
-
-    const isDateField = header.toLowerCase().includes('at') || header.toLowerCase() === 'timestamp';
-    if (isDateField && value && typeof value.seconds === 'number') {
+    if (header.toLowerCase().includes('at') && value?.seconds) {
       return format(new Date(value.seconds * 1000), 'PPP');
     }
-    return value.toString();
-  }
+    return String(value);
+  };
 
   const hasActions = showActions || showDeleteAction;
 
@@ -187,9 +188,7 @@ export function ViewSubmissions({
         <CardContent>
           {loading ? (
             <div className="space-y-2">
-              <Skeleton className="h-8 w-full" />
-              <Skeleton className="h-8 w-full" />
-              <Skeleton className="h-8 w-full" />
+              <Skeleton className="h-8 w-full" /> <Skeleton className="h-8 w-full" /> <Skeleton className="h-8 w-full" />
             </div>
           ) : (
             <Table>
@@ -207,17 +206,19 @@ export function ViewSubmissions({
                       <TableCell className="text-right">
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" className="h-8 w-8 p-0"><span className="sr-only">Open menu</span><MoreHorizontal className="h-4 w-4" /></Button>
+                            <Button variant="ghost" className="h-8 w-8 p-0" disabled={actionLoading === submission.id}>
+                              <span className="sr-only">Open menu</span>
+                              <MoreHorizontal className="h-4 w-4" />
+                            </Button>
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end">
-                            {/* --- NEW: Recruitment Process Options --- */}
                             {collectionName === 'recruitment' && (
                               <>
                                 <DropdownMenuItem onClick={() => handleInviteModal(submission, 'test')}>Invite for Test</DropdownMenuItem>
                                 <DropdownMenuItem onClick={() => handleInviteModal(submission, 'interview')}>Invite for Interview</DropdownMenuItem>
                                 <DropdownMenuItem onClick={() => handleProcessApplication(submission, 'accept')}>Confirm Membership</DropdownMenuItem>
                                 <DropdownMenuSeparator />
-                                <DropdownMenuItem className="text-red-600 focus:text-red-500" onClick={() => handleProcessApplication(submission, 'reject')}>Reject</DropdownMenuItem>
+                                <DropdownMenuItem className="text-red-600 focus:text-red-500" onClick={() => handleProcessApplication(submission, 'reject')}>Reject Application</DropdownMenuItem>
                                 <DropdownMenuSeparator />
                               </>
                             )}
@@ -244,7 +245,7 @@ export function ViewSubmissions({
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-            <AlertDialogDescription>This action cannot be undone. This will permanently delete the submission from "{itemToDelete?.name || itemToDelete?.fullName}".</AlertDialogDescription>
+            <AlertDialogDescription>This will permanently delete the submission for "{itemToDelete?.fullName}". This action cannot be undone.</AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
@@ -253,14 +254,11 @@ export function ViewSubmissions({
         </AlertDialogContent>
       </AlertDialog>
 
-      {/* --- NEW: Modal for sending test/interview invites --- */}
       <Dialog open={isInviteModalOpen} onOpenChange={setIsInviteModalOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Invite for {inviteModalType === 'test' ? 'Test' : 'Interview'}</DialogTitle>
-            <DialogDescription>
-              Enter the date and venue for the applicant's {inviteModalType}.
-            </DialogDescription>
+            <DialogTitle>Invite for {inviteModalType}</DialogTitle>
+            <DialogDescription>Enter the date and venue for the applicant's {inviteModalType}.</DialogDescription>
           </DialogHeader>
           <div className="grid gap-4 py-4">
             <div className="grid grid-cols-4 items-center gap-4">

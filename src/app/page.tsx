@@ -112,7 +112,7 @@ export default function Home() {
           
           <div className="flex-1 overflow-hidden">
             <div className="whitespace-nowrap animate-marquee text-yellow-900 font-medium px-4">
-              New: Runner ups in Aerodominator at SAE VIT &nbsp; | &nbsp; Our team got Air India Rank 1 at the SAEISS Drone Development Challenge! 
+              New: Runner ups in Aerodominator at SAE VIT &nbsp; | &nbsp; All India Rank 1 at the SAEISS Drone Development Challenge! 
             </div>
           </div>
         </div>

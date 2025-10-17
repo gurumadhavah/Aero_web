@@ -1,6 +1,6 @@
 "use client";
 
-// --- MODIFICATION: Added useState ---
+// --- MODIFICATION: Added useState and the new ViewContactMessages component ---
 import * as React from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
@@ -36,6 +36,8 @@ import { MaterialLogForm } from '@/components/dashboard/MaterialLogForm';
 import { RecentActivityFeed } from '@/components/dashboard/RecentActivityFeed';
 import { AddProjectForm } from '@/components/dashboard/AddProjectForm';
 import { ViewProjects } from '@/components/dashboard/ViewProjects';
+// --- NEW: Import the component for viewing and replying to contact messages ---
+import ViewContactMessages from '@/components/dashboard/ViewContactMessages';
 
 
 // --- Dashboard Components for Different Roles ---
@@ -131,25 +133,10 @@ const CaptainDashboard = ({ userProfile }: any) => {
                                     </div>
                                 </div>
                             </TabsContent>
+                            {/* --- MODIFICATION: Replaced ViewSubmissions with ViewContactMessages --- */}
                             <TabsContent value="contact">
                                 <div className="grid gap-8 pt-4">
-                                    <div className="my-4">
-                                        <ExportButton 
-                                            collectionName="contacts" 
-                                            fileName="contact_submissions" 
-                                            orderByField="submittedAt" 
-                                        />
-                                    </div>
-                                    <ViewSubmissions 
-                                        collectionName="contacts" 
-                                        title="Contact Form Submissions" 
-                                        description="Inquiries sent via the website's contact form." 
-                                        headers={['fullName', 'email', 'subject', 'message', 'submittedAt']} 
-                                        orderByField="submittedAt"
-                                        showActions={false}
-                                        showDeleteAction={true}
-                                        itemLimit={20}
-                                    />
+                                    <ViewContactMessages />
                                 </div>
                             </TabsContent>
                         </Tabs>

@@ -1,20 +1,21 @@
-// src/app/contact/page.tsx
 "use client";
 
 import * as React from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
+import emailjs from "emailjs-com";
 import { Mail, MapPin, Linkedin, Instagram, Send, User, Type } from "lucide-react";
 import Link from "next/link";
 import { db } from "@/lib/firebase";
-import { collection, addDoc, serverTimestamp } from "firebase/firestore"; // Added serverTimestamp
+import { collection, addDoc, serverTimestamp } from "firebase/firestore";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
+import { getContactNotificationBody } from "@/lib/emailTemplates"; // Import the helper
 
 const formSchema = z.object({
   fullName: z.string().min(1, { message: "Full name is required." }),
@@ -23,52 +24,61 @@ const formSchema = z.object({
   message: z.string().min(10, { message: "Message must be at least 10 characters." }),
 });
 
-
 export default function ContactPage() {
   const { toast } = useToast();
   
-  // --- Read environment variables ---
+  // Environment variables
   const contactEmail = process.env.NEXT_PUBLIC_CONTACT_EMAIL;
-  const collegeName = process.env.NEXT_PUBLIC_COLLEGE_NAME;
-  const collegeLocationText = process.env.NEXT_PUBLIC_COLLEGE_LOCATION_TEXT;
-  const mapsUrl = process.env.NEXT_PUBLIC_MAPS_URL;
-  const linkedinUrl = process.env.NEXT_PUBLIC_LINKEDIN_URL;
-  const instagramUrl = process.env.NEXT_PUBLIC_INSTAGRAM_URL;
-  
+  // ... (keep your other env variables here)
+
+  // EmailJS Credentials
+  const serviceId = process.env.NEXT_PUBLIC_EMAILJS_SERVICE_ID!;
+  const genericTemplateId = process.env.NEXT_PUBLIC_EMAILJS_TEMPLATE_GENERIC!;
+  const publicKey = process.env.NEXT_PUBLIC_EMAILJS_PUBLIC_KEY!;
+  const adminEmail = process.env.NEXT_PUBLIC_ADMIN_EMAIL!; // Add your admin email to .env.local
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
-    defaultValues: {
-      fullName: "",
-      email: "",
-      subject: "",
-      message: "",
-    },
+    defaultValues: { fullName: "", email: "", subject: "", message: "" },
   });
 
- async function onSubmit(values: z.infer<typeof formSchema>) {
+  async function onSubmit(values: z.infer<typeof formSchema>) {
     try {
-        // IMPORTANT FIX: Added submittedAt field to save the timestamp
-        await addDoc(collection(db, "contacts"), {
-            ...values,
-            submittedAt: serverTimestamp(),
-        });
+      // 1. Save to Firestore
+      await addDoc(collection(db, "contacts"), { ...values, submittedAt: serverTimestamp() });
 
-        toast({
-          title: "Message Sent!",
-          description: "Thank you for reaching out. We will get back to you shortly.",
-        });
-        form.reset();
-    } catch (error) {
-        console.error("Error adding document: ", error);
-        toast({
-            title: "Error",
-            description: "Could not send your message. Please try again.",
-            variant: "destructive",
-        });
+      // 2. Send email notification via EmailJS
+      const templateParams = {
+        subject: `New Contact Form Message: ${values.subject}`,
+        html_body: getContactNotificationBody({
+          from_name: values.fullName,
+          from_email: values.email,
+          subject: values.subject,
+          message: values.message,
+        }),
+        to_email: adminEmail, // Direct the email to your admin address
+      };
+
+      await emailjs.send(serviceId, genericTemplateId, templateParams, publicKey);
+
+      toast({
+        title: "Message Sent!",
+        description: "Thank you for reaching out. We will get back to you shortly.",
+      });
+      form.reset();
+    } catch (error: any) {
+      console.error("Error submitting form: ", error);
+      toast({
+        title: "Error",
+        description: `Could not send your message. ${error.text || ""}`,
+        variant: "destructive",
+      });
     }
-}
+  }
 
   return (
+    // Your existing JSX for the contact page...
+    // No changes needed in the JSX part of this file.
     <div className="container py-12 px-4 md:px-6 animate-fade-in-up">
        <div className="space-y-4 text-center mb-12">
         <h1 className="text-4xl font-bold font-headline tracking-tighter sm:text-5xl text-primary">Get In Touch</h1>
@@ -97,10 +107,10 @@ export default function ContactPage() {
                     <div className="p-3 bg-primary/10 rounded-full"><MapPin className="h-6 w-6 text-primary" /></div>
                     <div>
                         <h3 className="font-semibold text-lg">Our Location</h3>
-                        <p className="text-foreground/80">{collegeName}</p>
-                        <Link href={mapsUrl || "#"} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">
+                        {/* <p className="text-foreground/80">{collegeName}</p> */}
+                        {/* <Link href={mapsUrl || "#"} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">
                             {collegeLocationText}
-                        </Link>
+                        </Link> */}
                     </div>
                 </div>
                 <div className="flex items-start gap-4">
@@ -109,12 +119,12 @@ export default function ContactPage() {
                         <h3 className="font-semibold text-lg">Social Media</h3>
                         <p className="text-foreground/80">Follow our journey</p>
                          <div className="flex space-x-4 mt-1">
-                            <Link href={linkedinUrl || "#"} target="_blank" rel="noopener noreferrer" aria-label="LinkedIn" className="text-primary hover:text-primary/80 transition-colors">
+                            {/* <Link href={linkedinUrl || "#"} target="_blank" rel="noopener noreferrer" aria-label="LinkedIn" className="text-primary hover:text-primary/80 transition-colors"> */}
                             <Linkedin className="h-7 w-7" />
-                            </Link>
-                            <Link href={instagramUrl || "#"} target="_blank" aria-label="Instagram" className="text-primary hover:text-primary/80 transition-colors">
+                            {/* </Link> */}
+                            {/* <Link href={instagramUrl || "#"} target="_blank" aria-label="Instagram" className="text-primary hover:text-primary/80 transition-colors"> */}
                                 <Instagram className="h-7 w-7" />
-                            </Link>
+                            {/* </Link> */}
                         </div>
                     </div>
                 </div>
