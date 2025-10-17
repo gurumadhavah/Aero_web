@@ -1,4 +1,4 @@
-import { https, firestore } from "firebase-functions/v1";
+import { https } from "firebase-functions/v1";
 import * as admin from "firebase-admin";
 
 // Initialize the admin app lazily
