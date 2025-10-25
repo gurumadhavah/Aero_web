@@ -26,3 +26,51 @@ export const gallerySchema = z.object({
   videoUrl: z.string().url({ message: "Please enter a valid URL." }).optional().or(z.literal('')),
   description: z.string().optional(),
 });
+
+export const recruitmentFormSchema = z.object({
+  fullName: z.string().min(1, "Name is required."),
+  yearOfStudy: z.enum(["1st year", "2nd year", "Other"], {
+    required_error: "You need to select your year of study.",
+  }),
+  yearOther: z.string().optional(), // Optional field if "Other" year is selected
+  branch: z.enum(["AIML", "CIVIL", "CSBS", "CSDS", "CSE", "ECE", "EEE", "MECH", "OTHER"], {
+    required_error: "You need to select your branch.",
+  }),
+  branchOther: z.string().optional(), // Optional field if "Other" branch is selected
+  mobileNumber: z.string().regex(/^\d{10}$/, "Please enter a valid 10-digit mobile number."),
+  email: z.string().email("Please enter a valid email address."),
+  isHostelite: z.enum(["Yes", "No"], {
+    required_error: "Please specify if you are a hostelite.",
+  }),
+  interests: z.array(z.string()).refine((value) => value.some((item) => item), {
+    message: "You have to select at least one interest.",
+  }),
+  interestOther: z.string().optional(), // Optional field if "Other" interest is selected
+}).refine(data => {
+    // If "Other" year is selected, the specify field must not be empty
+    if (data.yearOfStudy === "Other" && !data.yearOther) {
+        return false;
+    }
+    return true;
+}, {
+    message: "Please specify your year if you selected 'Other'.",
+    path: ["yearOther"], // Field to show the error message under
+}).refine(data => {
+    // If "Other" branch is selected, the specify field must not be empty
+    if (data.branch === "OTHER" && !data.branchOther) {
+        return false;
+    }
+    return true;
+}, {
+    message: "Please specify your branch if you selected 'OTHER'.",
+    path: ["branchOther"], // Field to show the error message under
+}).refine(data => {
+    // If "Other" interest is selected, the specify field must not be empty
+    if (data.interests.includes("Other") && !data.interestOther) {
+        return false;
+    }
+    return true;
+}, {
+    message: "Please specify your interest if you selected 'Other'.",
+    path: ["interestOther"], // Field to show the error message under
+});

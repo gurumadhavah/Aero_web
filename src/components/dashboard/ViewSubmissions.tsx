@@ -2,9 +2,10 @@
 
 import * as React from "react";
 import { db } from "@/lib/firebase";
-import { collection, query, limit, onSnapshot, Query, doc, deleteDoc, updateDoc, serverTimestamp } from "firebase/firestore";
+// Removed 'limit' import
+import { collection, query, onSnapshot, Query, doc, deleteDoc, updateDoc, serverTimestamp, orderBy } from "firebase/firestore";
 import { format } from 'date-fns';
-import { MoreHorizontal, Trash2 } from "lucide-react";
+import { MoreHorizontal, Trash2, Search } from "lucide-react"; // Added Search icon
 import emailjs from "emailjs-com";
 import { getRecruitmentEmailBody, getRecruitmentEmailSubject } from "@/lib/emailTemplates";
 
@@ -17,7 +18,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
+import { Input } from "@/components/ui/input"; // Input is already imported
 import { Label } from "@/components/ui/label";
 
 // Interfaces
@@ -27,6 +28,10 @@ interface Submission {
   email?: string;
   status?: string;
   submittedAt?: { seconds: number; nanoseconds: number; };
+  // Add other potential fields from your recruitment form to search through
+  branch?: string;
+  yearOfStudy?: string;
+  mobileNumber?: string;
   [key: string]: any;
 }
 
@@ -38,7 +43,7 @@ interface ViewSubmissionsProps {
   showActions?: boolean;
   showDeleteAction?: boolean;
   orderByField?: string;
-  itemLimit?: number;
+  // Removed itemLimit prop
 }
 
 const formatHeader = (header: string) => {
@@ -54,9 +59,10 @@ export function ViewSubmissions({
   showActions = false,
   showDeleteAction = false,
   orderByField,
-  itemLimit = 20,
-}: ViewSubmissionsProps) {
-  const [submissions, setSubmissions] = React.useState<Submission[]>([]);
+}: ViewSubmissionsProps) { // Removed itemLimit default
+  const [allSubmissions, setAllSubmissions] = React.useState<Submission[]>([]); // Renamed original state
+  const [filteredSubmissions, setFilteredSubmissions] = React.useState<Submission[]>([]); // State for filtered results
+  const [searchTerm, setSearchTerm] = React.useState(''); // State for search input
   const [loading, setLoading] = React.useState(true);
   const [actionLoading, setActionLoading] = React.useState<string | null>(null);
   const [isAlertOpen, setIsAlertOpen] = React.useState(false);
@@ -73,24 +79,45 @@ export function ViewSubmissions({
   const genericTemplateId = process.env.NEXT_PUBLIC_EMAILJS_TEMPLATE_GENERIC!;
   const publicKey = process.env.NEXT_PUBLIC_EMAILJS_PUBLIC_KEY!;
 
+  // Fetch all submissions initially
   React.useEffect(() => {
     setLoading(true);
-    const q: Query = query(collection(db, collectionName), limit(itemLimit));
+    let q: Query = collection(db, collectionName);
+    if (orderByField) {
+      q = query(q, orderBy(orderByField, "desc"));
+    }
+
     const unsubscribe = onSnapshot(q, (querySnapshot) => {
-      let data = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Submission));
-      if (orderByField) {
-        data.sort((a, b) => {
-          const aTimestamp = a[orderByField];
-          const bTimestamp = b[orderByField];
-          if (aTimestamp && bTimestamp) return bTimestamp.seconds - aTimestamp.seconds;
-          return 0;
-        });
-      }
-      setSubmissions(data);
+      const data = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Submission));
+      setAllSubmissions(data);
+      // Initialize filtered list with all data
+      setFilteredSubmissions(data);
       setLoading(false);
+    }, (error) => {
+        console.error(`Error fetching ${collectionName}:`, error);
+        toast({ title: "Error", description: `Could not load ${collectionName} data.`, variant: "destructive" });
+        setLoading(false);
     });
     return () => unsubscribe();
-  }, [collectionName, orderByField, itemLimit]);
+  }, [collectionName, orderByField, toast]);
+
+  // useEffect to filter submissions when searchTerm changes
+  React.useEffect(() => {
+    const lowerCaseSearchTerm = searchTerm.toLowerCase();
+    const filtered = allSubmissions.filter(submission => {
+        // Check multiple fields for the search term
+        return (
+            submission.fullName?.toLowerCase().includes(lowerCaseSearchTerm) ||
+            submission.email?.toLowerCase().includes(lowerCaseSearchTerm) ||
+            submission.status?.toLowerCase().includes(lowerCaseSearchTerm) ||
+            submission.branch?.toLowerCase().includes(lowerCaseSearchTerm) ||
+            submission.yearOfStudy?.toLowerCase().includes(lowerCaseSearchTerm) ||
+            submission.mobileNumber?.toLowerCase().includes(lowerCaseSearchTerm)
+            // Add any other fields you want to search
+        );
+    });
+    setFilteredSubmissions(filtered);
+  }, [searchTerm, allSubmissions]); // Re-run filter when search term or original data changes
 
   const handleInviteModal = (applicant: Submission, type: 'test' | 'interview') => {
     setApplicantToInvite(applicant);
@@ -122,12 +149,8 @@ export function ViewSubmissions({
       if (action.includes('invite')) newStatus += '_invited';
       await updateDoc(docRef, { status: newStatus, lastUpdated: serverTimestamp() });
 
-      // --- FIX & IMPROVEMENT IS HERE ---
-      // Create a new details object for the email to format the date nicely.
       let emailDetails = details;
       if (details && details.date) {
-        // The input type="date" gives "YYYY-MM-DD". We add 'T00:00:00' to avoid timezone issues
-        // and then format it into a readable string like "October 17, 2025".
         const formattedDate = format(new Date(details.date + 'T00:00:00'), 'MMMM d, yyyy');
         emailDetails = { ...details, date: formattedDate };
       }
@@ -139,7 +162,7 @@ export function ViewSubmissions({
       };
 
       await emailjs.send(serviceId, genericTemplateId, templateParams, publicKey);
-      
+
       toast({ title: "Action Success", description: `Application for ${applicant.fullName} processed.` });
     } catch (error: any) {
       console.error("Error processing application:", error);
@@ -159,19 +182,24 @@ export function ViewSubmissions({
     try {
       await deleteDoc(doc(db, collectionName, itemToDelete.id));
       toast({ title: "Success", description: "Submission has been deleted." });
+      // Also remove from the filtered list immediately for better UX
+      setFilteredSubmissions(prev => prev.filter(sub => sub.id !== itemToDelete!.id)); // Use non-null assertion
     } catch (error) {
       toast({ title: "Error", description: "Failed to delete submission.", variant: "destructive" });
     } finally {
       setIsAlertOpen(false);
-      setItemToDelete(null);
+      setItemToDelete(null); // Reset item to delete
     }
   };
 
   const formatCell = (submission: Submission, header: string) => {
     const value = submission[header];
-    if (!value) return '-';
+    if (value === null || value === undefined) return '-';
     if (header.toLowerCase().includes('at') && value?.seconds) {
       return format(new Date(value.seconds * 1000), 'PPP');
+    }
+    if (Array.isArray(value)) {
+        return value.join(', ');
     }
     return String(value);
   };
@@ -182,8 +210,28 @@ export function ViewSubmissions({
     <>
       <Card>
         <CardHeader>
-          <CardTitle>{title}</CardTitle>
-          <CardDescription>{description}</CardDescription>
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+              <div>
+                  {/* Display count of ALL submissions */}
+                  <CardTitle>
+                    {title} {collectionName === 'recruitment' && !loading && `(${allSubmissions.length})`}
+                  </CardTitle>
+                  <CardDescription>{description}</CardDescription>
+              </div>
+              {/* Search Input */}
+              {collectionName === 'recruitment' && (
+                  <div className="relative w-full sm:w-64">
+                    <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                    <Input
+                        type="search"
+                        placeholder="Search name, email, status..."
+                        className="pl-8 w-full"
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                    />
+                  </div>
+              )}
+          </div>
         </CardHeader>
         <CardContent>
           {loading ? (
@@ -199,7 +247,8 @@ export function ViewSubmissions({
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {submissions.length > 0 ? submissions.map(submission => (
+                {/* Use filteredSubmissions */}
+                {filteredSubmissions.length > 0 ? filteredSubmissions.map(submission => (
                   <TableRow key={submission.id}>
                     {headers.map(header => <TableCell key={header}>{formatCell(submission, header)}</TableCell>)}
                     {hasActions && (
@@ -233,7 +282,9 @@ export function ViewSubmissions({
                     )}
                   </TableRow>
                 )) : (
-                  <TableRow><TableCell colSpan={headers.length + (hasActions ? 1 : 0)} className="h-24 text-center">No submissions found.</TableCell></TableRow>
+                  <TableRow><TableCell colSpan={headers.length + (hasActions ? 1 : 0)} className="h-24 text-center">
+                      {searchTerm ? 'No submissions match your search.' : 'No submissions found.'}
+                    </TableCell></TableRow>
                 )}
               </TableBody>
             </Table>
@@ -241,6 +292,7 @@ export function ViewSubmissions({
         </CardContent>
       </Card>
 
+      {/* AlertDialog and Dialog components remain unchanged */}
       <AlertDialog open={isAlertOpen} onOpenChange={setIsAlertOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
