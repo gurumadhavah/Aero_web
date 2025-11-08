@@ -4,22 +4,28 @@ import * as React from "react";
 import Image from "next/image";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { db } from "@/lib/firebase";
-import { collection, getDocs, query, orderBy, where, Timestamp } from "firebase/firestore";
+// We only need the 'orderBy' import for the client-side sort logic if needed, but we'll use .sort()
+import { collection, getDocs, query, where, Timestamp } from "firebase/firestore";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Calendar, MapPin } from "lucide-react";
-import { format } from "date-fns";
+import { format, parseISO } from "date-fns";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 
 interface Event {
   id: string;
   title: string;
-  date: Timestamp;
+  date: string; // This is a string, like "2025-10-31"
   location: string;
   description: string;
   imageUrl: string;
   registrationLink?: string;
 }
+
+// Helper function to get today's date as a YYYY-MM-DD string
+const getTodayString = () => {
+  return new Date().toISOString().split('T')[0];
+};
 
 export default function EventsPage() {
   const [events, setEvents] = React.useState<Event[]>([]);
@@ -28,21 +34,28 @@ export default function EventsPage() {
   React.useEffect(() => {
     const fetchEvents = async () => {
       try {
-        const now = new Date();
+        const todayString = getTodayString();
+
+        // --- THIS IS THE FIX ---
+        // 1. Query with 'where' but WITHOUT 'orderBy'.
+        // This query does not require a special index.
         const q = query(
           collection(db, "events"),
-          where("date", ">=", now),
-          orderBy("date", "asc")
+          where("date", ">=", todayString)
+          // No orderBy("date", "asc")
         );
+        // --- END OF FIX 1 ---
+
         const querySnapshot = await getDocs(q);
+
         const eventsData = querySnapshot.docs
           .map(doc => ({
             id: doc.id,
             ...doc.data()
           } as Event))
-          // --- THIS IS THE FIX ---
-          // It ensures we only try to render items that have a valid imageUrl.
-          .filter(item => item.imageUrl && typeof item.imageUrl === 'string');
+          .filter(item => item.imageUrl && typeof item.imageUrl === 'string')
+          // --- FIX 2: Sort the results here in the browser ---
+          .sort((a, b) => a.date.localeCompare(b.date)); // Sorts "2025-10-31" before "2025-11-01"
           
         setEvents(eventsData);
       } catch (error) {
@@ -72,10 +85,10 @@ export default function EventsPage() {
       ) : events.length === 0 ? (
         <Card>
           <CardHeader>
-            <CardTitle>Content Coming Soon</CardTitle>
+            <CardTitle>No Upcoming Events</CardTitle>
           </CardHeader>
           <CardContent>
-            <p>This page will showcase the club's events, rendered dynamically from our records. Check back soon for updates!</p>
+            <p>There are no upcoming events scheduled at this time. Please check back soon for updates!</p>
           </CardContent>
         </Card>
       ) : (
@@ -99,7 +112,8 @@ export default function EventsPage() {
                   <div className="flex items-center gap-4 text-sm text-muted-foreground">
                     <div className="flex items-center gap-2">
                       <Calendar className="h-4 w-4" />
-                      <span>{format(event.date.toDate(), "PPP")}</span>
+                      {/* This logic for parsing the string remains correct */}
+                      <span>{format(parseISO(event.date), "PPP")}</span>
                     </div>
                     <div className="flex items-center gap-2">
                       <MapPin className="h-4 w-4" />
