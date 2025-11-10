@@ -4,34 +4,39 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { db, storage } from "@/lib/firebase";
-import { collection, addDoc, serverTimestamp } from "firebase/firestore";
+import {
+  collection,
+  addDoc,
+  serverTimestamp,
+  Timestamp,
+} from "firebase/firestore";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { Button } from "@/components/ui/button";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useAuth } from "@/context/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import { useState } from "react";
+import { eventSchema } from "@/lib/schemas"; // <-- 1. IMPORT THE SCHEMA
 
-const formSchema = z.object({
-  title: z.string().min(3, "Title is required."),
-  date: z.string().min(3, "Date is required."),
-  location: z.string().min(3, "Location is required."),
-  description: z.string().min(10, "Description is required."),
-  registrationLink: z.string().url().optional().or(z.literal('')),
-  imageFile: z.custom<File>(val => val instanceof File, "An image file is required."),
-});
-
+// 2. Use the imported schema type
 export function AddEventForm({ onEventAdded }: { onEventAdded?: () => void }) {
   const { toast } = useToast();
   const { user } = useAuth();
   const [isUploading, setIsUploading] = useState(false);
 
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
+  const form = useForm<z.infer<typeof eventSchema>>({ // <-- 3. Use the schema here
+    resolver: zodResolver(eventSchema), // <-- 4. And here
     defaultValues: {
-      title: "",
+      name: "",
       date: "",
       location: "",
       description: "",
@@ -40,7 +45,7 @@ export function AddEventForm({ onEventAdded }: { onEventAdded?: () => void }) {
     },
   });
 
-  async function onSubmit(values: z.infer<typeof formSchema>) {
+  async function onSubmit(values: z.infer<typeof eventSchema>) {
     if (!user || !values.imageFile) return;
     setIsUploading(true);
     try {
@@ -48,9 +53,13 @@ export function AddEventForm({ onEventAdded }: { onEventAdded?: () => void }) {
       const uploadTask = await uploadBytes(storageRef, values.imageFile);
       const downloadURL = await getDownloadURL(uploadTask.ref);
 
+      // Convert date string to Timestamp here
+      const eventDate = new Date(values.date);
+      const eventTimestamp = Timestamp.fromDate(eventDate);
+
       await addDoc(collection(db, "events"), {
-        title: values.title,
-        date: values.date,
+        name: values.name, // Save as 'name'
+        date: eventTimestamp, // Save as Timestamp
         location: values.location,
         description: values.description,
         registrationLink: values.registrationLink,
@@ -72,31 +81,68 @@ export function AddEventForm({ onEventAdded }: { onEventAdded?: () => void }) {
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-        <FormField control={form.control} name="title" render={({ field }) => (
-          <FormItem><FormLabel>Event Title</FormLabel><FormControl><Input placeholder="Annual Drone Workshop" {...field} /></FormControl><FormMessage /></FormItem>
-        )} />
-        <FormField control={form.control} name="date" render={({ field }) => (
-          <FormItem><FormLabel>Event Date</FormLabel><FormControl><Input placeholder="e.g., September 25, 2025" {...field} /></FormControl><FormMessage /></FormItem>
-        )} />
-        <FormField control={form.control} name="location" render={({ field }) => (
-          <FormItem><FormLabel>Location</FormLabel><FormControl><Input placeholder="SJEC Campus, Main Auditorium" {...field} /></FormControl><FormMessage /></FormItem>
-        )} />
-        <FormField control={form.control} name="description" render={({ field }) => (
-          <FormItem><FormLabel>Description</FormLabel><FormControl><Textarea placeholder="Details about the event..." {...field} /></FormControl><FormMessage /></FormItem>
-        )} />
-        <FormField control={form.control} name="registrationLink" render={({ field }) => (
-          <FormItem><FormLabel>Registration Link (Optional)</FormLabel><FormControl><Input placeholder="https://forms.gle/..." {...field} /></FormControl><FormMessage /></FormItem>
-        )} />
-        <FormField control={form.control} name="imageFile" render={({ field }) => (
-          <FormItem>
-              <FormLabel>Image</FormLabel>
+        <FormField control={form.control} name="name" render={({ field }) => (
+            <FormItem>
+              <FormLabel>Event Name</FormLabel>
               <FormControl>
-                  <Input type="file" accept="image/png, image/jpeg, image/webp"
-                  onChange={(event) => field.onChange(event.target.files?.[0])}/>
+                <Input placeholder="Annual Drone Workshop" {...field} />
               </FormControl>
               <FormMessage />
-          </FormItem>
-        )} />
+            </FormItem>
+          )}
+        />
+        <FormField control={form.control} name="date" render={({ field }) => (
+            <FormItem>
+              <FormLabel>Event Date and Time</FormLabel>
+              <FormControl>
+                <Input type="datetime-local" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField control={form.control} name="location" render={({ field }) => (
+            <FormItem>
+              <FormLabel>Location</FormLabel>
+              <FormControl>
+                <Input placeholder="SJEC Campus, Main Auditorium" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField control={form.control} name="description" render={({ field }) => (
+            <FormItem>
+              <FormLabel>Description</FormLabel>
+              <FormControl>
+                <Textarea placeholder="Details about the event..." {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField control={form.control} name="registrationLink" render={({ field }) => (
+            <FormItem>
+              <FormLabel>Registration Link (Optional)</FormLabel>
+              <FormControl>
+                <Input placeholder="https://forms.gle/..." {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField control={form.control} name="imageFile" render={({ field }) => (
+            <FormItem>
+              <FormLabel>Image</FormLabel>
+              <FormControl>
+                <Input type="file" accept="image/png, image/jpeg, image/webp"
+                  onChange={(event) => field.onChange(event.target.files?.[0])}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
         <Button type="submit" disabled={isUploading}>
           {isUploading ? "Uploading..." : "Add Event"}
         </Button>

@@ -294,9 +294,9 @@ export default function RecruitmentPage() {
                 <CardTitle className="text-2xl font-bold">Recruitment is Currently Closed</CardTitle>
                 <CardDescription className="pt-2">
                     Thank you for your interest in SJEC Aero! We are not accepting new applications at this time.
-                    <br /> <br />
-                    <strong className="text-primary">Registrations will open on October 22, 2025, at 6:00 PM IST.</strong>
-                    <br /> <br />
+                    {/* <br />  <br />
+                    <strong className="text-primary">Registrations will open on October 22, 2025, at 6:00 PM IST.</strong> */}
+                    <br />  <br />
                     Please check back then, or follow our social media channels for updates on our next recruitment drive.
                 </CardDescription>
             </CardHeader>

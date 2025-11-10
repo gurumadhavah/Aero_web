@@ -10,13 +10,15 @@ export const achievementSchema = z.object({
   rank: z.string().optional(),
 });
 
+// --- THIS IS THE CORRECTED SCHEMA ---
 export const eventSchema = z.object({
-  title: z.string().min(1, { message: "Title is required." }),
-  date: z.date({ required_error: "A date is required." }),
+  name: z.string().min(3, "Event name is required."),
+  date: z.string().min(1, "Date and time are required."),
   location: z.string().min(1, { message: "Location is required." }),
   description: z.string().min(10, { message: "Description must be at least 10 characters." }),
-  imageUrl: z.string().min(1, { message: "Image path is required." }),
+  imageUrl: z.string().optional(), // This is handled by the imageFile
   registrationLink: z.string().url({ message: "Please enter a valid URL." }).optional().or(z.literal('')),
+  imageFile: z.custom<File>((val) => val instanceof File, "An image file is required."),
 });
 
 export const gallerySchema = z.object({
@@ -27,6 +29,7 @@ export const gallerySchema = z.object({
   description: z.string().optional(),
 });
 
+// ... (your recruitmentFormSchema is correct and remains unchanged) ...
 export const recruitmentFormSchema = z.object({
   fullName: z.string().min(1, "Name is required."),
   yearOfStudy: z.enum(["1st year", "2nd year", "Other"], {
